@@ -1,0 +1,796 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ระบบบันทึกข้อมูล PCR DOESur2026</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Prompt -->
+    <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Prompt', sans-serif;
+            background-color: #f1f5f9;
+        }
+        
+        input[type=number]::-webkit-inner-spin-button, 
+        input[type=number]::-webkit-outer-spin-button { 
+            -webkit-appearance: none; 
+            margin: 0; 
+        }
+
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+        /* Custom style สำหรับช่องติ๊กอาการ เพื่อให้เปลี่ยนสีและแสดงเครื่องหมายถูก */
+        .check-card input:checked + div {
+            background-color: #2563eb; /* bg-blue-600 */
+            border-color: #2563eb;
+            color: white;
+        }
+        .check-card input:checked + div svg {
+            display: block;
+        }
+    </style>
+</head>
+<body class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
+
+    <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+        
+        <!-- Header System -->
+        <div class="bg-slate-900 px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <div class="flex items-center gap-3 mb-1">
+                    <div class="bg-blue-500 p-2 rounded-lg">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                    </div>
+                    <h1 class="text-2xl font-bold text-white tracking-wide">PCR DOESur2026</h1>
+                </div>
+                <p class="text-slate-400 text-sm ml-11">ระบบบันทึกข้อมูลการเฝ้าระวังผู้ป่วย</p>
+            </div>
+            
+            <div class="flex items-center gap-4">
+                <div id="statusBadge" class="flex items-center gap-2 text-sm text-slate-300 bg-slate-800 py-2 px-4 rounded-lg transition-colors">
+                    <span id="statusDot" class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></span>
+                    <span id="statusText">Connecting...</span>
+                </div>
+                <!-- ป้ายแสดงโควตา -->
+                <div id="quotaBadge" class="flex items-center gap-2 text-sm font-medium py-2 px-4 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30">
+                    <span id="quotaText">โควตาสัปดาห์นี้: - / 5</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="bg-slate-50 border-b border-slate-200 px-8 flex gap-6">
+            <button onclick="window.switchTab('formTab')" id="btnFormTab" class="py-4 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors">
+                ฟอร์มบันทึกข้อมูล
+            </button>
+            <button onclick="window.switchTab('listTab')" id="btnListTab" class="py-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors">
+                รายการข้อมูลที่บันทึก
+            </button>
+        </div>
+
+        <!-- TAB 1: Form Content -->
+        <div id="formSection" class="block">
+            <form id="mainForm" class="p-8 space-y-10" novalidate>
+                
+                <!-- SECTION 1 -->
+                <section>
+                    <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-100">
+                        <h2 class="text-lg font-semibold text-slate-800">1. ข้อมูลทั่วไปของผู้ป่วย</h2>
+                        <span class="text-xs font-medium text-rose-500 bg-rose-50 px-2 py-1 rounded-full">* จำเป็นทุกข้อ</span>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <div class="md:col-span-3 form-group">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">วันที่บันทึก</label>
+                            <input type="date" id="recordDate" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700">
+                        </div>
+                        <div class="md:col-span-3 form-group">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">รหัส HN</label>
+                            <input type="text" id="hn" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="ระบุ HN">
+                        </div>
+                        <div class="md:col-span-6 form-group">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">ชื่อ - นามสกุล</label>
+                            <input type="text" id="fullName" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="ชื่อ นามสกุล">
+                        </div>
+                        <div class="md:col-span-4 form-group">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">เพศ</label>
+                            <div class="flex bg-slate-100 p-1.5 rounded-lg border border-slate-200">
+                                <label class="flex-1 cursor-pointer relative">
+                                    <input type="radio" name="gender" value="ชาย" class="peer sr-only" required>
+                                    <div class="text-center py-2 rounded-md text-sm text-slate-600 font-medium transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-sm">ชาย</div>
+                                </label>
+                                <label class="flex-1 cursor-pointer relative">
+                                    <input type="radio" name="gender" value="หญิง" class="peer sr-only" required>
+                                    <div class="text-center py-2 rounded-md text-sm text-slate-600 font-medium transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:shadow-sm">หญิง</div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="md:col-span-3 form-group">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">อายุ (ปี)</label>
+                            <div class="relative">
+                                <input type="number" id="age" min="0" required class="w-full px-4 py-2.5 pr-10 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="0">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">ปี</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 2 -->
+                <section>
+                    <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-100">
+                        <h2 class="text-lg font-semibold text-slate-800">2. อาการทางคลินิก (Clinical Signs)</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <div class="md:col-span-4 form-group">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">วันที่เริ่มป่วย</label>
+                            <input type="date" id="onsetDate" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700">
+                        </div>
+                        <div class="md:col-span-4 form-group">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">อุณหภูมิสูงสุด</label>
+                            <div class="relative">
+                                <input type="number" id="maxTemp" step="0.1" required class="w-full px-4 py-2.5 pr-10 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="37.5">
+                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">°C</span>
+                            </div>
+                        </div>
+                        <div class="md:col-span-12 form-group mt-2">
+                            <label class="flex items-center gap-2 text-sm font-medium text-slate-700 mb-3">
+                                <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                อาการเบื้องต้น (ติ๊กเลือกเมื่อมีอาการ หรือ มีการใส่ท่อ)
+                            </label>
+                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                                <label class="cursor-pointer relative check-card group">
+                                    <input type="checkbox" name="symptoms" value="ไข้" class="sr-only">
+                                    <div class="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-slate-200 bg-white transition-all text-slate-600 hover:bg-slate-50 shadow-sm">
+                                        <svg class="w-5 h-5 hidden text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-sm font-medium">ประวัติไข้</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative check-card group">
+                                    <input type="checkbox" name="symptoms" value="ไอ" class="sr-only">
+                                    <div class="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-slate-200 bg-white transition-all text-slate-600 hover:bg-slate-50 shadow-sm">
+                                        <svg class="w-5 h-5 hidden text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-sm font-medium">อาการไอ</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative check-card group">
+                                    <input type="checkbox" name="symptoms" value="หอบเหนื่อย" class="sr-only">
+                                    <div class="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-slate-200 bg-white transition-all text-slate-600 hover:bg-slate-50 shadow-sm">
+                                        <svg class="w-5 h-5 hidden text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-sm font-medium">อาการหอบเหนื่อย</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative check-card group">
+                                    <input type="checkbox" name="symptoms" value="ใส่ท่อช่วยหายใจ" class="sr-only">
+                                    <div class="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-slate-200 bg-white transition-all text-slate-600 hover:bg-slate-50 shadow-sm">
+                                        <svg class="w-5 h-5 hidden text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-sm font-medium">ใส่ท่อช่วยหายใจ (ETT)</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SECTION 3 -->
+                <section>
+                    <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-100">
+                        <h2 class="text-lg font-semibold text-slate-800">3. การรักษาและการวินิจฉัย</h2>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        <div class="md:col-span-12 form-group">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">รักษาที่ตึก</label>
+                            <div class="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="ward" value="ICU" class="peer sr-only" required>
+                                    <div class="text-center py-2 px-1 rounded-lg border border-slate-200 text-sm text-slate-600 font-medium transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50">ICU</div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="ward" value="RCU" class="peer sr-only" required>
+                                    <div class="text-center py-2 px-1 rounded-lg border border-slate-200 text-sm text-slate-600 font-medium transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50">RCU</div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="ward" value="PICU" class="peer sr-only" required>
+                                    <div class="text-center py-2 px-1 rounded-lg border border-slate-200 text-sm text-slate-600 font-medium transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50">PICU</div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="ward" value="อายุรกรรม" class="peer sr-only" required>
+                                    <div class="text-center py-2 px-1 rounded-lg border border-slate-200 text-sm text-slate-600 font-medium transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50">อายุรกรรม</div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="ward" value="กุมารเวชกรรม" class="peer sr-only" required>
+                                    <div class="text-center py-2 px-1 rounded-lg border border-slate-200 text-sm text-slate-600 font-medium transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50 text-[0.8rem] sm:text-sm">กุมารเวช</div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="ward" value="อื่นๆ" class="peer sr-only" required>
+                                    <div class="text-center py-2 px-1 rounded-lg border border-slate-200 text-sm text-slate-600 font-medium transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50">อื่นๆ</div>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="md:col-span-12 form-group">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">การวินิจฉัยโรค (Diagnosis)</label>
+                            <input type="text" id="diagnosis" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="ระบุการวินิจฉัยโรคเบื้องต้น">
+                        </div>
+                    </div>
+                </section>
+
+                <div class="pt-6 mt-6 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-center justify-end gap-3">
+                    <button type="button" onclick="window.cancelEdit()" id="cancelEditBtn" class="hidden w-full sm:w-auto px-6 py-2.5 text-slate-600 bg-slate-100 hover:bg-slate-200 font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300">
+                        ยกเลิกการแก้ไข
+                    </button>
+                    <button type="submit" id="submitBtn" class="w-full sm:w-auto px-8 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500 flex items-center justify-center gap-2" disabled>
+                        <svg id="submitIcon" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4"></path></svg>
+                        <span id="submitText">รอการเชื่อมต่อ...</span>
+                    </button>
+                </div>
+            </form>
+
+            <!-- หน้าแจ้งเตือนโควตาเต็ม -->
+            <div id="quotaFullMessage" class="hidden p-12 flex flex-col items-center justify-center text-center min-h-[400px]">
+                <div class="bg-amber-100 text-amber-500 rounded-full p-5 mb-6 shadow-sm border-4 border-white">
+                    <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4 tracking-tight">PCR DOESur2026 ครบ 5 รายในสัปดาห์นี้แล้ว</h2>
+                <p class="text-slate-500 text-lg max-w-lg leading-relaxed">
+                    ระบบได้ทำการปิดรับข้อมูลใหม่สำหรับสัปดาห์นี้<br>
+                    <span class="text-blue-600 font-medium text-base">ระบบจะเปิดให้บันทึกข้อมูลรอบใหม่ ในวันพฤหัสบดีถัดไป</span>
+                </p>
+            </div>
+        </div>
+
+        <!-- TAB 2: List Content -->
+        <div id="listSection" class="hidden p-8">
+            <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-slate-800">รายการข้อมูลทั้งหมด</h2>
+                <div class="text-sm text-slate-500">รวม: <span id="totalRecordsCount" class="font-bold text-blue-600">0</span> รายการ</div>
+            </div>
+            
+            <div class="overflow-x-auto rounded-xl border border-slate-200">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-slate-50 text-slate-600 font-medium border-b border-slate-200">
+                        <tr>
+                            <th class="py-3 px-4">วันที่บันทึก</th>
+                            <th class="py-3 px-4">HN</th>
+                            <th class="py-3 px-4">ชื่อ - นามสกุล</th>
+                            <th class="py-3 px-4">ตึก</th>
+                            <th class="py-3 px-4">การวินิจฉัย</th>
+                            <th class="py-3 px-4 text-center">จัดการ</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody" class="divide-y divide-slate-100 bg-white text-slate-700">
+                        <!-- แถวข้อมูลจะถูกเพิ่มด้วย JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="emptyState" class="hidden flex-col items-center justify-center py-12 text-slate-400">
+                <svg class="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                <p>ยังไม่มีข้อมูลในระบบ</p>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Modal Success -->
+    <div id="successModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-sm mx-auto transform transition-all scale-95 opacity-0" id="modalContent">
+            <div class="flex items-center justify-center mb-4">
+                <div class="bg-emerald-100 text-emerald-600 rounded-full p-3">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"></path></svg>
+                </div>
+            </div>
+            <h3 id="modalTitle" class="text-lg font-bold text-center text-slate-800 mb-2">บันทึกข้อมูลเรียบร้อย</h3>
+            <p id="modalDesc" class="text-sm text-slate-500 text-center mb-6">ระบบทำการจัดเก็บข้อมูลผู้ป่วยเข้าฐานข้อมูลแล้ว</p>
+            <button onclick="window.closeModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-slate-400">
+                ตกลง
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal Password Authentication -->
+    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-sm mx-auto transform transition-all scale-95 opacity-0" id="authModalContent">
+            <div class="flex items-center justify-center mb-4">
+                <div class="bg-blue-100 text-blue-600 rounded-full p-4">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
+                </div>
+            </div>
+            <h3 class="text-lg font-bold text-center text-slate-800 mb-2">ยืนยันตัวตน</h3>
+            <p class="text-sm text-slate-500 text-center mb-4">กรุณากรอกรหัสผ่านเพื่อสิทธิ์ในการแก้ไขหรือลบข้อมูล</p>
+            <input type="password" id="authPassword" class="w-full px-4 py-3 mb-2 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-center tracking-widest text-xl font-bold text-slate-700" placeholder="••••">
+            <p id="authErrorMsg" class="text-sm font-medium text-rose-500 text-center mb-4 hidden">รหัสผ่านไม่ถูกต้อง กรุณาลองใหม่</p>
+            <div class="flex gap-3 mt-4">
+                <button onclick="window.closeAuthModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 px-4 rounded-lg transition-all focus:outline-none">
+                    ยกเลิก
+                </button>
+                <button onclick="window.confirmAuth()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all focus:outline-none">
+                    ตกลง
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Delete Confirm -->
+    <div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity">
+        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-sm mx-auto" id="deleteModalContent">
+            <div class="flex items-center justify-center mb-4">
+                <div class="bg-rose-100 text-rose-600 rounded-full p-3">
+                    <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                </div>
+            </div>
+            <h3 class="text-lg font-bold text-center text-slate-800 mb-2">ยืนยันการลบข้อมูล?</h3>
+            <p class="text-sm text-slate-500 text-center mb-6">ข้อมูลที่ถูกลบจะไม่สามารถกู้คืนได้ และหากลบข้อมูลของสัปดาห์นี้ ระบบจะคืนโควตาให้</p>
+            <div class="flex gap-3">
+                <button onclick="window.closeDeleteModal()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2.5 px-4 rounded-lg transition-all focus:outline-none">
+                    ยกเลิก
+                </button>
+                <button id="confirmDeleteBtn" class="w-full bg-rose-600 hover:bg-rose-700 text-white font-medium py-2.5 px-4 rounded-lg transition-all focus:outline-none flex items-center justify-center gap-2">
+                    ลบข้อมูล
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase Scripts -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, onSnapshot, addDoc, updateDoc, deleteDoc, doc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        // Constants & Global State
+        const MAX_PER_WEEK = 5;
+        const SECURITY_PIN = "3013"; 
+        let editingId = null; 
+        let deletingId = null;
+        let pendingAuthAction = null; 
+        let pendingAuthId = null;
+        let pcrData = []; // เก็บข้อมูลที่ถูกซิงค์มาจาก Firebase
+        let isFirebaseReady = false;
+
+        // Firebase Config (อิงตามโปรเจกต์ของคุณ)
+        const firebaseConfig = {
+            apiKey: "AIzaSyBky3iEhMNj2mzqssbRW_8UQNBbjjSbWfI",
+            authDomain: "pcr-doesur2026.firebaseapp.com",
+            projectId: "pcr-doesur2026",
+            storageBucket: "pcr-doesur2026.firebasestorage.app",
+            messagingSenderId: "340155598580",
+            appId: "1:340155598580:web:d89096b7b73efe15e8c0a1"
+        };
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        let dbCollection = null;
+
+        // UI Elements
+        const form = document.getElementById('mainForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitText = document.getElementById('submitText');
+        const cancelEditBtn = document.getElementById('cancelEditBtn');
+        const quotaBadge = document.getElementById('quotaBadge');
+        const quotaText = document.getElementById('quotaText');
+        const quotaFullMessage = document.getElementById('quotaFullMessage');
+        const successModal = document.getElementById('successModal');
+        const modalContent = document.getElementById('modalContent');
+        const deleteModal = document.getElementById('deleteModal');
+        const authModal = document.getElementById('authModal');
+        const authModalContent = document.getElementById('authModalContent');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+
+        // Initializing Authentication
+        const initAuth = async () => {
+            try {
+                // เชื่อมต่อด้วย Anonymous 
+                await signInAnonymously(auth);
+            } catch (error) {
+                console.error("Authentication Error", error);
+                alert("เชื่อมต่อฐานข้อมูลไม่ได้: โปรดเปิดใช้งาน Anonymous Sign-in ใน Firebase");
+            }
+        };
+
+        // Firebase Auth Listener
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                // เชื่อมต่อเข้า Collection ของโปรเจกต์ตัวเอง
+                dbCollection = collection(db, 'pcr_records');
+                
+                // Real-time Database Listener
+                onSnapshot(dbCollection, (snapshot) => {
+                    pcrData = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                    
+                    if (!isFirebaseReady) {
+                        isFirebaseReady = true;
+                        document.getElementById('statusDot').classList.replace('bg-amber-400', 'bg-emerald-400');
+                        document.getElementById('statusText').innerText = 'Connected (Cloud)';
+                        window.cancelEdit(); // ปลดล็อกปุ่มและตั้งวันที่
+                    }
+
+                    updateQuotaUI(); 
+                    if (!document.getElementById('listSection').classList.contains('hidden')) {
+                        renderTable(); 
+                    }
+                }, (error) => {
+                    console.error("Firestore Listener Error:", error);
+                });
+            }
+        });
+
+        initAuth(); // Start auth
+
+        // --------------------- Core App Logic ---------------------
+
+        // ฟังก์ชันหา Key สัปดาห์ปัจจุบัน (คำนวณจาก พฤหัส - พุธ)
+        function getWeekKey() {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const dayOfWeek = today.getDay(); 
+            const diffFromThursday = (dayOfWeek + 7 - 4) % 7;
+            const thursdayDate = new Date(today);
+            thursdayDate.setDate(today.getDate() - diffFromThursday);
+            return `week_${thursdayDate.getFullYear()}-${String(thursdayDate.getMonth() + 1).padStart(2, '0')}-${String(thursdayDate.getDate()).padStart(2, '0')}`;
+        }
+
+        function getCurrentWeekCount() {
+            const currentWeekKey = getWeekKey();
+            return pcrData.filter(item => item.weekKey === currentWeekKey).length;
+        }
+
+        window.switchTab = function(tabName) {
+            const formSection = document.getElementById('formSection');
+            const listSection = document.getElementById('listSection');
+            const btnFormTab = document.getElementById('btnFormTab');
+            const btnListTab = document.getElementById('btnListTab');
+
+            if (tabName === 'formTab') {
+                formSection.classList.remove('hidden');
+                listSection.classList.add('hidden');
+                btnFormTab.className = "py-4 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors";
+                btnListTab.className = "py-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors";
+                updateQuotaUI(); 
+            } else {
+                formSection.classList.add('hidden');
+                listSection.classList.remove('hidden');
+                btnListTab.className = "py-4 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors";
+                btnFormTab.className = "py-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors";
+                renderTable(); 
+            }
+        }
+
+        function updateQuotaUI() {
+            if (!isFirebaseReady) return;
+            const count = getCurrentWeekCount();
+            quotaText.innerHTML = `โควตาสัปดาห์นี้: ${count} / ${MAX_PER_WEEK}`;
+            
+            if (editingId) {
+                quotaBadge.className = "flex items-center gap-2 text-sm font-medium py-2 px-4 rounded-lg bg-amber-500/20 text-amber-500 border border-amber-500/30";
+                quotaText.innerHTML = "กำลังโหมดแก้ไขข้อมูล";
+                form.classList.remove('hidden');
+                quotaFullMessage.classList.add('hidden');
+                submitBtn.disabled = false;
+                return;
+            }
+
+            if (count >= MAX_PER_WEEK) {
+                quotaBadge.className = "flex items-center gap-2 text-sm font-medium py-2 px-4 rounded-lg bg-rose-500/20 text-rose-400 border border-rose-500/30";
+                form.classList.add('hidden');
+                quotaFullMessage.classList.remove('hidden');
+            } else {
+                quotaBadge.className = "flex items-center gap-2 text-sm font-medium py-2 px-4 rounded-lg bg-emerald-500/20 text-emerald-400 border border-emerald-500/30";
+                form.classList.remove('hidden');
+                quotaFullMessage.classList.add('hidden');
+                submitBtn.disabled = false;
+            }
+        }
+
+        function renderTable() {
+            const tbody = document.getElementById('tableBody');
+            const emptyState = document.getElementById('emptyState');
+            document.getElementById('totalRecordsCount').innerText = pcrData.length;
+            tbody.innerHTML = '';
+            
+            if (pcrData.length === 0) {
+                emptyState.classList.replace('hidden', 'flex');
+                tbody.parentElement.classList.add('hidden');
+            } else {
+                emptyState.classList.replace('flex', 'hidden');
+                tbody.parentElement.classList.remove('hidden');
+                
+                // เรียงจากข้อมูลใหม่ล่าสุดไปเก่า (กรณีข้อมูลเก่าที่ไม่มี createdAt จะถูกดันไว้ล่าง)
+                const sortedData = [...pcrData].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                
+                sortedData.forEach(row => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-slate-50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="py-3 px-4">${row.recordDate || '-'}</td>
+                        <td class="py-3 px-4 font-medium text-slate-800">${row.hn || '-'}</td>
+                        <td class="py-3 px-4">${row.name || '-'}</td>
+                        <td class="py-3 px-4"><span class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md text-xs font-medium">${row.ward || '-'}</span></td>
+                        <td class="py-3 px-4 truncate max-w-[150px]" title="${row.diagnosis || ''}">${row.diagnosis || '-'}</td>
+                        <td class="py-3 px-4 text-center">
+                            <div class="flex items-center justify-center gap-2">
+                                <button onclick="window.requestAuth('edit', '${row.id}')" class="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" title="แก้ไข">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
+                                </button>
+                                <button onclick="window.requestAuth('delete', '${row.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="ลบ">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            }
+        }
+
+        // --- ระบบ Authentication (รหัสผ่าน) ---
+        window.requestAuth = function(action, id) {
+            pendingAuthAction = action;
+            pendingAuthId = id;
+            document.getElementById('authPassword').value = '';
+            document.getElementById('authErrorMsg').classList.add('hidden');
+            authModal.classList.remove('hidden');
+            setTimeout(() => { 
+                authModalContent.classList.remove('scale-95', 'opacity-0');
+                document.getElementById('authPassword').focus();
+            }, 10);
+        }
+
+        window.closeAuthModal = function() {
+            authModalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { 
+                authModal.classList.add('hidden'); 
+            }, 200);
+        }
+
+        window.confirmAuth = function() {
+            const pwdInput = document.getElementById('authPassword');
+            if (pwdInput.value.trim() === SECURITY_PIN) {
+                // จับเก็บค่า action และ id ไว้ก่อนเผื่อถูกเคลียร์ทิ้ง
+                const action = pendingAuthAction;
+                const id = pendingAuthId;
+                
+                window.closeAuthModal();
+                
+                // สั่งประมวลผลทันที โดยไม่ต้องรอ setTimeout 200ms
+                if (action === 'edit') {
+                    window.editData(id);
+                } else if (action === 'delete') {
+                    window.promptDelete(id);
+                }
+            } else {
+                document.getElementById('authErrorMsg').classList.remove('hidden');
+                pwdInput.value = '';
+                pwdInput.focus();
+            }
+        }
+
+        document.getElementById('authPassword').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') { window.confirmAuth(); }
+        });
+
+        // จัดการ UI Form Error Red outlines
+        form.addEventListener('input', function(e) {
+            const group = e.target.closest('.form-group');
+            if (group) {
+                const inputs = group.querySelectorAll('input');
+                inputs.forEach(input => {
+                    input.classList.remove('border-rose-500', 'ring-1', 'ring-rose-500');
+                    if(input.type !== 'radio' && input.type !== 'checkbox') input.classList.add('border-slate-300');
+                });
+                const toggleWrapper = group.querySelector('.bg-slate-100'); 
+                if (toggleWrapper) {
+                    toggleWrapper.classList.remove('border-rose-500', 'ring-1', 'ring-rose-500', 'bg-rose-50');
+                    toggleWrapper.classList.add('border-slate-200', 'bg-slate-100');
+                }
+                const errorMsg = group.querySelector('.error-msg');
+                if (errorMsg) errorMsg.remove();
+            }
+        });
+
+        // กระบวนการกดปุ่มบันทึก
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+            if (!isFirebaseReady) return;
+
+            // ตรวจสอบโควตาสำหรับรายการใหม่
+            if (!editingId && getCurrentWeekCount() >= MAX_PER_WEEK) {
+                updateQuotaUI();
+                return;
+            }
+
+            // Form Validation
+            if (!form.checkValidity()) {
+                const invalidElements = form.querySelectorAll(':invalid');
+                let isFirstError = true;
+                invalidElements.forEach((el) => {
+                    const group = el.closest('.form-group');
+                    if (group) {
+                        if (el.type === 'radio') {
+                            const toggleWrapper = group.querySelector('.bg-slate-100, .grid');
+                            if (toggleWrapper) toggleWrapper.classList.add('border-rose-500', 'ring-1', 'ring-rose-500');
+                        } else {
+                            el.classList.replace('border-slate-300', 'border-rose-500');
+                            el.classList.add('ring-1', 'ring-rose-500');
+                        }
+                        if (!group.querySelector('.error-msg')) {
+                            const errorMsg = document.createElement('div');
+                            errorMsg.className = 'error-msg text-rose-500 text-xs mt-1.5 font-medium';
+                            errorMsg.innerText = `* จำเป็นต้องระบุข้อมูล`;
+                            group.appendChild(errorMsg);
+                        }
+                        if (isFirstError) { group.scrollIntoView({ behavior: 'smooth', block: 'center' }); isFirstError = false; }
+                    }
+                });
+                return;
+            }
+
+            // นำข้อมูลลง Record
+            const symptoms = Array.from(document.querySelectorAll('input[name="symptoms"]:checked')).map(cb => cb.value);
+            
+            submitBtn.disabled = true;
+            submitText.innerText = "กำลังบันทึก...";
+
+            try {
+                let existingRecord = editingId ? pcrData.find(r => r.id === editingId) : null;
+                const record = {
+                    weekKey: editingId && existingRecord && existingRecord.weekKey ? existingRecord.weekKey : getWeekKey(),
+                    createdAt: editingId && existingRecord && existingRecord.createdAt ? existingRecord.createdAt : Date.now(),
+                    recordDate: document.getElementById('recordDate').value,
+                    hn: document.getElementById('hn').value,
+                    name: document.getElementById('fullName').value,
+                    gender: document.querySelector('input[name="gender"]:checked').value,
+                    age: document.getElementById('age').value,
+                    onsetDate: document.getElementById('onsetDate').value,
+                    maxTemp: document.getElementById('maxTemp').value,
+                    symptoms: symptoms,
+                    ward: document.querySelector('input[name="ward"]:checked').value,
+                    diagnosis: document.getElementById('diagnosis').value
+                };
+
+                if (editingId) {
+                    const docRef = doc(db, 'pcr_records', editingId);
+                    await updateDoc(docRef, record);
+                    document.getElementById('modalTitle').innerText = 'อัปเดตข้อมูลเรียบร้อย';
+                    document.getElementById('modalDesc').innerText = 'ระบบได้ปรับปรุงข้อมูลในฐานข้อมูล Cloud แล้ว';
+                } else {
+                    await addDoc(dbCollection, record);
+                    document.getElementById('modalTitle').innerText = 'บันทึกข้อมูลเรียบร้อย';
+                    document.getElementById('modalDesc').innerText = 'ระบบทำการจัดเก็บข้อมูลเข้าฐานข้อมูล Cloud แล้ว';
+                }
+                
+                successModal.classList.remove('hidden');
+                setTimeout(() => { modalContent.classList.remove('scale-95', 'opacity-0'); }, 10);
+                window.cancelEdit(); 
+                
+            } catch (error) {
+                console.error("Error writing document: ", error);
+                alert("เกิดข้อผิดพลาดในการบันทึกข้อมูล โปรดตรวจสอบ Firestore Rules");
+            } finally {
+                submitBtn.disabled = false;
+                submitText.innerText = "บันทึกข้อมูลเข้าระบบ";
+            }
+        });
+
+        // ดึงข้อมูลมาแก้ไข (เพิ่มระบบป้องกันข้อมูลว่าง)
+        window.editData = function(id) {
+            try {
+                const data = pcrData.find(r => r.id === id);
+                if (!data) return;
+
+                editingId = id;
+                window.switchTab('formTab');
+
+                submitText.innerText = "อัปเดตข้อมูล";
+                submitBtn.classList.replace('bg-blue-600', 'bg-amber-500');
+                submitBtn.classList.replace('hover:bg-blue-700', 'hover:bg-amber-600');
+                submitBtn.classList.replace('focus:ring-blue-500', 'focus:ring-amber-500');
+                cancelEditBtn.classList.remove('hidden');
+
+                // เติมข้อมูลลงช่องต่างๆ อย่างปลอดภัย
+                if(document.getElementById('recordDate')) document.getElementById('recordDate').value = data.recordDate || '';
+                if(document.getElementById('hn')) document.getElementById('hn').value = data.hn || '';
+                if(document.getElementById('fullName')) document.getElementById('fullName').value = data.name || '';
+                
+                if (data.gender) {
+                    const gRadio = document.querySelector(`input[name="gender"][value="${data.gender}"]`);
+                    if (gRadio) gRadio.checked = true;
+                }
+                
+                if(document.getElementById('age')) document.getElementById('age').value = data.age || '';
+                if(document.getElementById('onsetDate')) document.getElementById('onsetDate').value = data.onsetDate || '';
+                if(document.getElementById('maxTemp')) document.getElementById('maxTemp').value = data.maxTemp || '';
+                
+                if (data.ward) {
+                    const wRadio = document.querySelector(`input[name="ward"][value="${data.ward}"]`);
+                    if (wRadio) wRadio.checked = true;
+                }
+                
+                if(document.getElementById('diagnosis')) document.getElementById('diagnosis').value = data.diagnosis || '';
+
+                document.querySelectorAll('input[name="symptoms"]').forEach(cb => {
+                    cb.checked = (data.symptoms || []).includes(cb.value);
+                });
+                
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+                updateQuotaUI(); 
+            } catch (err) {
+                console.error("Error populating edit form: ", err);
+            }
+        }
+
+        window.cancelEdit = function() {
+            editingId = null;
+            form.reset();
+            
+            const today = new Date();
+            if(document.getElementById('recordDate')) {
+                document.getElementById('recordDate').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+            }
+
+            submitText.innerText = "บันทึกข้อมูลเข้าระบบ";
+            submitBtn.classList.replace('bg-amber-500', 'bg-blue-600');
+            submitBtn.classList.replace('hover:bg-amber-600', 'hover:bg-blue-700');
+            submitBtn.classList.replace('focus:ring-amber-500', 'focus:ring-blue-500');
+            cancelEditBtn.classList.add('hidden');
+            
+            if (isFirebaseReady) {
+                submitBtn.disabled = false;
+            }
+            updateQuotaUI();
+        }
+
+        // --- ระบบลบข้อมูล Firebase ---
+        window.promptDelete = function(id) {
+            deletingId = id;
+            deleteModal.classList.remove('hidden');
+        }
+
+        window.closeDeleteModal = function() {
+            deletingId = null;
+            deleteModal.classList.add('hidden');
+        }
+
+        confirmDeleteBtn.addEventListener('click', async function() {
+            if (deletingId) {
+                const originalText = confirmDeleteBtn.innerHTML;
+                confirmDeleteBtn.innerHTML = "กำลังลบ...";
+                confirmDeleteBtn.disabled = true;
+
+                try {
+                    const docRef = doc(db, 'pcr_records', deletingId);
+                    await deleteDoc(docRef);
+                    window.closeDeleteModal();
+                } catch (error) {
+                    console.error("Error deleting document: ", error);
+                    alert("เกิดข้อผิดพลาดในการลบข้อมูล โปรดตรวจสอบ Firestore Rules");
+                } finally {
+                    confirmDeleteBtn.innerHTML = originalText;
+                    confirmDeleteBtn.disabled = false;
+                }
+            }
+        });
+
+        window.closeModal = function() {
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => { successModal.classList.add('hidden'); }, 200);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            // ตั้งวันที่ครั้งแรก
+            const today = new Date();
+            const recordDateInput = document.getElementById('recordDate');
+            if(recordDateInput) {
+                recordDateInput.value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+            }
+        });
+
+    </script>
+</body>
+</html>
