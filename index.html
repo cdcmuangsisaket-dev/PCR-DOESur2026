@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบันทึกข้อมูล PCR DOESur 2026</title>
+    <title>ระบบบันทึกข้อมูล PCR DOESur 2026 SSKH </title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Prompt -->
@@ -47,7 +47,7 @@
                     <div class="bg-blue-500 p-2 rounded-lg">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                     </div>
-                    <h1 class="text-2xl font-bold text-white tracking-wide">PCR DOESur 2026</h1>
+                    <h1 class="text-2xl font-bold text-white tracking-wide">PCR DOESur2026</h1>
                 </div>
                 <p class="text-slate-400 text-sm ml-11">ระบบบันทึกข้อมูลการเฝ้าระวังผู้ป่วยทางเดินหายใจรุนแรง</p>
             </div>
@@ -181,7 +181,7 @@
                 <!-- SECTION 3 -->
                 <section>
                     <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-100">
-                        <h2 class="text-lg font-semibold text-slate-800">3. การรักษาและการวินิจฉัย (Treatment and diagnosis) </h2>
+                        <h2 class="text-lg font-semibold text-slate-800">3. การรักษาและการวินิจฉัย (Treatment and diagnosis)</h2>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -245,15 +245,25 @@
                 <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4 tracking-tight">PCR DOESur 2026 ครบ 5 รายในสัปดาห์นี้แล้ว</h2>
                 <p class="text-slate-500 text-lg max-w-lg leading-relaxed">
                     ระบบได้ทำการปิดรับข้อมูล<br>
-                    <span class="block mt-4 text-2xl md:text-2xl font-bold text-rose-600">ระบบจะเปิดให้บันทึกข้อมูลรอบใหม่ ในวันพฤหัสบดี</span>
+                    <span class="block mt-4 text-2xl md:text-3xl font-bold text-rose-600">ระบบจะเปิดให้บันทึกข้อมูลรอบใหม่ ในวันพฤหัสบดี</span>
                 </p>
             </div>
         </div>
 
         <!-- TAB 2: List Content -->
         <div id="listSection" class="hidden p-8">
-            <div class="flex items-center justify-between mb-6">
-                <h2 class="text-xl font-bold text-slate-800">รายการข้อมูลทั้งหมด</h2>
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
+                <h2 class="text-xl font-bold text-slate-800">รายการข้อมูลที่บันทึก</h2>
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                    <label class="text-sm font-medium text-slate-500 whitespace-nowrap">เลือกสัปดาห์:</label>
+                    <select id="weekFilter" class="w-full sm:w-auto px-3 py-2 rounded-lg border border-slate-300 text-sm focus:ring-blue-500 focus:border-blue-500 outline-none bg-white text-slate-700 shadow-sm cursor-pointer">
+                        <option value="all">ข้อมูลทั้งหมด</option>
+                        <!-- Options populated via JS -->
+                    </select>
+                </div>
+            </div>
+            
+            <div class="mb-4 flex items-center justify-between">
                 <div class="text-sm text-slate-500">รวม: <span id="totalRecordsCount" class="font-bold text-blue-600">0</span> รายการ</div>
             </div>
             
@@ -277,7 +287,7 @@
             
             <div id="emptyState" class="hidden flex-col items-center justify-center py-12 text-slate-400">
                 <svg class="w-12 h-12 mb-3 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                <p>ยังไม่มีข้อมูลในระบบ</p>
+                <p>ยังไม่มีข้อมูลในสัปดาห์นี้</p>
             </div>
         </div>
 
@@ -292,7 +302,7 @@
                 </div>
             </div>
             <h3 id="modalTitle" class="text-lg font-bold text-center text-slate-800 mb-2">บันทึกข้อมูลเรียบร้อย</h3>
-            <p id="modalDesc" class="text-sm text-slate-500 text-center mb-6">ระบบทำการจัดเก็บข้อมูลผู้ป่วยเข้าฐานข้อมูลแล้ว</p>
+            <p id="modalDesc" class="text-sm text-slate-500 text-center mb-6">ระบบทำการจัดเก็บข้อมูลผู้ป่วยแล้ว</p>
             <button onclick="window.closeModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-slate-400">
                 ตกลง
             </button>
@@ -394,6 +404,7 @@
         const authModal = document.getElementById('authModal');
         const authModalContent = document.getElementById('authModalContent');
         const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const weekFilter = document.getElementById('weekFilter');
 
         // Initializing Authentication
         const initAuth = async () => {
@@ -415,13 +426,14 @@
                     if (!isFirebaseReady) {
                         isFirebaseReady = true;
                         document.getElementById('statusDot').classList.replace('bg-amber-400', 'bg-emerald-400');
-                        document.getElementById('statusText').innerText = 'มีปัญหาสอบถาม 3215';
+                        document.getElementById('statusText').innerText = 'Connected (Cloud)';
                         window.cancelEdit(); 
                     }
 
                     updateQuotaUI(); 
+                    window.updateWeekFilter();
                     if (!document.getElementById('listSection').classList.contains('hidden')) {
-                        renderTable(); 
+                        window.renderTable(); 
                     }
                 }, (error) => {
                     console.error("Firestore Listener Error:", error);
@@ -465,7 +477,7 @@
                 listSection.classList.remove('hidden');
                 btnListTab.className = "py-4 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors";
                 btnFormTab.className = "py-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors";
-                renderTable(); 
+                window.renderTable(); 
             }
         }
 
@@ -495,20 +507,61 @@
             }
         }
 
-        function renderTable() {
+        // --- อัปเดตตัวกรองสัปดาห์ ---
+        window.updateWeekFilter = function() {
+            const currentValue = weekFilter.value;
+            const currentWeekKey = getWeekKey();
+            
+            // ดึงสัปดาห์ที่ไม่ซ้ำจากข้อมูล และเรียงจากใหม่ไปเก่า
+            const uniqueWeeks = [...new Set(pcrData.map(item => item.weekKey))].filter(Boolean).sort().reverse();
+            
+            let optionsHtml = `<option value="all">ข้อมูลทั้งหมด</option>`;
+            
+            // เพิ่มสัปดาห์ปัจจุบันเผื่อยังไม่มีข้อมูล
+            if (!uniqueWeeks.includes(currentWeekKey)) {
+                optionsHtml += `<option value="${currentWeekKey}">สัปดาห์ปัจจุบัน</option>`;
+            }
+            
+            uniqueWeeks.forEach(week => {
+                const label = week === currentWeekKey ? 'สัปดาห์ปัจจุบัน' : `รอบเริ่ม ${week.replace('week_', '')}`;
+                optionsHtml += `<option value="${week}">${label}</option>`;
+            });
+            
+            weekFilter.innerHTML = optionsHtml;
+            
+            // ถ้ามีค่าเดิมที่ถูกเลือกอยู่ และค่านั้นมีในตัวเลือก ให้ตั้งค่าเดิม (หรือทั้งหมด)
+            if (currentValue && (uniqueWeeks.includes(currentValue) || currentValue === 'all' || currentValue === currentWeekKey)) {
+                weekFilter.value = currentValue;
+            } else {
+                // ถ้าเพิ่งเปิดหน้าเว็บ ให้ตั้งเป็นสัปดาห์ปัจจุบัน
+                weekFilter.value = currentWeekKey;
+            }
+        };
+
+        // --- Render ข้อมูลตามตัวกรอง ---
+        window.renderTable = function() {
             const tbody = document.getElementById('tableBody');
             const emptyState = document.getElementById('emptyState');
-            document.getElementById('totalRecordsCount').innerText = pcrData.length;
+            const filterVal = weekFilter.value;
+            
+            let filteredData = pcrData;
+            
+            // กรองข้อมูลตามสัปดาห์ที่เลือก
+            if (filterVal !== 'all') {
+                filteredData = pcrData.filter(item => item.weekKey === filterVal);
+            }
+            
+            document.getElementById('totalRecordsCount').innerText = filteredData.length;
             tbody.innerHTML = '';
             
-            if (pcrData.length === 0) {
+            if (filteredData.length === 0) {
                 emptyState.classList.replace('hidden', 'flex');
                 tbody.parentElement.classList.add('hidden');
             } else {
                 emptyState.classList.replace('flex', 'hidden');
                 tbody.parentElement.classList.remove('hidden');
                 
-                const sortedData = [...pcrData].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
+                const sortedData = [...filteredData].sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
                 
                 sortedData.forEach(row => {
                     const tr = document.createElement('tr');
@@ -538,6 +591,9 @@
                 });
             }
         }
+
+        // จับเหตุการณ์เมื่อเปลี่ยนสัปดาห์ใน Dropdown
+        weekFilter.addEventListener('change', window.renderTable);
 
         // --- ระบบสร้างตัวเลือกตึกย่อย ---
         window.renderSubWards = function(wardValue, selectedSubWard = null) {
@@ -655,6 +711,12 @@
                         const normalizedHN = rawHN.replace(/^0+(?=\d)/, ''); 
                         const isDuplicateHN = pcrData.some(record => {
                             if (editingId && record.id === editingId) return false;
+                            
+                            // ข้ามการเช็กถ้าเป็นข้อมูลของสัปดาห์อื่น (อนุญาตให้ลง HN เดิมได้ถ้าเป็นสัปดาห์ใหม่)
+                            // หรือถ้าต้องการให้ห้ามลง HN เดิมตลอดกาล ให้เอา 2 บรรทัดล่างนี้ออกครับ
+                            const currentWeek = getWeekKey();
+                            if (record.weekKey !== currentWeek) return false;
+                            
                             const recordHN = (record.hn || '').trim().replace(/^0+(?=\d)/, '');
                             return recordHN === normalizedHN;
                         });
@@ -737,13 +799,15 @@
 
             // --- ตรวจสอบ HN ซ้ำ (ตัดเลข 0 ด้านหน้าออก) ---
             const rawHN = document.getElementById('hn').value.trim();
-            // regex /^0+(?=\d)/ จะตัด 0 ด้านหน้าออกทั้งหมด แต่ถ้าเป็น 0 ล้วนจะเหลือไว้ 1 ตัว
             const normalizedHN = rawHN.replace(/^0+(?=\d)/, ''); 
             
             const isDuplicateHN = pcrData.some(record => {
-                // ถ้าอยู่ในโหมดแก้ไข และเป็น ID ของตัวเอง ให้ข้ามการเช็กซ้ำ
                 if (editingId && record.id === editingId) return false;
                 
+                // ตรวจสอบซ้ำเฉพาะในสัปดาห์เดียวกันเท่านั้น
+                const currentWeek = getWeekKey();
+                if (record.weekKey !== currentWeek) return false;
+
                 const recordHN = (record.hn || '').trim().replace(/^0+(?=\d)/, '');
                 return recordHN === normalizedHN;
             });
