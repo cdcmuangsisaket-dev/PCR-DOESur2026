@@ -741,7 +741,7 @@
                     const docRef = doc(db, 'pcr_records', editingId);
                     await updateDoc(docRef, record);
                     document.getElementById('modalTitle').innerText = 'อัปเดตข้อมูลเรียบร้อย';
-                    document.getElementById('modalDesc').innerText = 'ระบบได้ปรับปรุงข้อมูลในฐานข้อมูล Cloud แล้ว';
+                    document.getElementById('modalDesc').innerText = 'ระบบได้ปรับปรุงข้อมูลแล้ว';
                 } else {
                     await addDoc(dbCollection, record);
                     document.getElementById('modalTitle').innerText = 'บันทึกข้อมูลเรียบร้อย';
