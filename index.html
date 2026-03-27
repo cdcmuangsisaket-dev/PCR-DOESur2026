@@ -49,7 +49,7 @@
                     </div>
                     <h1 class="text-2xl font-bold text-white tracking-wide">PCR DOESur2026</h1>
                 </div>
-                <p class="text-slate-400 text-sm ml-11">ระบบบันทึกข้อมูลการเฝ้าระวังผู้ป่วยทางเดินหายใจรุนแรง</p>
+                <p class="text-slate-400 text-sm ml-11">ระบบบันทึกข้อมูลการเฝ้าระวังผู้ป่วย</p>
             </div>
             
             <div class="flex items-center gap-4">
@@ -245,7 +245,7 @@
                 <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4 tracking-tight">PCR DOESur2026 ครบ 5 รายในสัปดาห์นี้แล้ว</h2>
                 <p class="text-slate-500 text-lg max-w-lg leading-relaxed">
                     ระบบได้ทำการปิดรับข้อมูลใหม่สำหรับสัปดาห์นี้<br>
-                    <span class="text-blue-600 font-medium text-base">ระบบจะเปิดให้บันทึกข้อมูลรอบใหม่ ในวันพฤหัสบดี</span>
+                    <span class="text-blue-600 font-medium text-base">ระบบจะเปิดให้บันทึกข้อมูลรอบใหม่ ในวันพฤหัสบดีถัดไป</span>
                 </p>
             </div>
         </div>
@@ -710,6 +710,38 @@
                 }
 
                 return;
+            }
+
+            // --- ตรวจสอบ HN ซ้ำ (ตัดเลข 0 ด้านหน้าออก) ---
+            const rawHN = document.getElementById('hn').value.trim();
+            // regex /^0+(?=\d)/ จะตัด 0 ด้านหน้าออกทั้งหมด แต่ถ้าเป็น 0 ล้วนจะเหลือไว้ 1 ตัว
+            const normalizedHN = rawHN.replace(/^0+(?=\d)/, ''); 
+            
+            const isDuplicateHN = pcrData.some(record => {
+                // ถ้าอยู่ในโหมดแก้ไข และเป็น ID ของตัวเอง ให้ข้ามการเช็กซ้ำ
+                if (editingId && record.id === editingId) return false;
+                
+                const recordHN = (record.hn || '').trim().replace(/^0+(?=\d)/, '');
+                return recordHN === normalizedHN;
+            });
+
+            if (isDuplicateHN) {
+                const hnGroup = document.getElementById('hn').closest('.form-group');
+                const hnInput = document.getElementById('hn');
+                
+                hnInput.classList.replace('border-slate-300', 'border-rose-500');
+                hnInput.classList.add('ring-1', 'ring-rose-500');
+                
+                let errorMsg = hnGroup.querySelector('.error-msg');
+                if (!errorMsg) {
+                    errorMsg = document.createElement('div');
+                    errorMsg.className = 'error-msg text-rose-500 text-xs mt-1.5 font-medium';
+                    hnGroup.appendChild(errorMsg);
+                }
+                errorMsg.innerText = `* HN นี้ถูกบันทึกไปแล้ว (ระบบป้องกันการลงข้อมูลซ้ำ)`;
+                
+                hnGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                return; // หยุดการบันทึก
             }
 
             // อ่านค่าตึกย่อย ถ้ามีการแสดงผลอยู่และถูกเลือก
