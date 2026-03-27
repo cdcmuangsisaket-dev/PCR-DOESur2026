@@ -645,8 +645,31 @@
                     if (symGrid) symGrid.classList.remove('border-rose-500', 'ring-1', 'ring-rose-500', 'p-2', 'rounded-xl');
                 }
 
-                const errorMsg = group.querySelector('.error-msg');
-                if (errorMsg) errorMsg.remove();
+                const errorMsgs = group.querySelectorAll('.error-msg');
+                errorMsgs.forEach(msg => msg.remove());
+                
+                // === เพิ่มระบบเช็ก HN ซ้ำแบบเรียลไทม์ ===
+                if (e.target.id === 'hn') {
+                    const rawHN = e.target.value.trim();
+                    if (rawHN) {
+                        const normalizedHN = rawHN.replace(/^0+(?=\d)/, ''); 
+                        const isDuplicateHN = pcrData.some(record => {
+                            if (editingId && record.id === editingId) return false;
+                            const recordHN = (record.hn || '').trim().replace(/^0+(?=\d)/, '');
+                            return recordHN === normalizedHN;
+                        });
+
+                        if (isDuplicateHN) {
+                            e.target.classList.remove('border-slate-300');
+                            e.target.classList.add('border-rose-500', 'ring-1', 'ring-rose-500');
+                            
+                            const errorMsg = document.createElement('div');
+                            errorMsg.className = 'error-msg text-rose-500 text-xs mt-1.5 font-medium';
+                            errorMsg.innerText = `* HN นี้ถูกบันทึกไปแล้ว (ระบบป้องกันการลงข้อมูลซ้ำ)`;
+                            group.appendChild(errorMsg);
+                        }
+                    }
+                }
             }
         });
 
