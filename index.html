@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบันทึกข้อมูล PCR DOESur2026 SSKH</title>
+    <title>ระบบบันทึกข้อมูล PCR DOESur2026</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Prompt -->
@@ -71,9 +71,9 @@
                     <div class="bg-blue-500 p-2 rounded-lg">
                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                     </div>
-                    <h1 class="text-2xl font-bold text-white tracking-wide">PCR DOESur2026 SSKH </h1>
+                    <h1 class="text-2xl font-bold text-white tracking-wide">PCR DOESur2026</h1>
                 </div>
-                <p class="text-slate-400 text-sm ml-11">ระบบบันทึกข้อมูลการเฝ้าระวังผู้ป่วยทางเดินหายใจรุนแรง โรงพยาบาลศรีสะเกษ</p>
+                <p class="text-slate-400 text-sm ml-11">ระบบบันทึกข้อมูลการเฝ้าระวังผู้ป่วย</p>
             </div>
             
             <div class="flex items-center gap-4">
@@ -414,7 +414,7 @@
 
         <!-- อาการทางคลินิก และ การวินิจฉัยโรค -->
         <div class="mb-5 mt-2 text-[11pt]">
-            <div class="font-bold mb-2"></div>
+            <div class="font-bold mb-2">อาการทางคลินิก (Clinical Signs) และ การวินิจฉัยโรคเบื้องต้น (Diagnosis)</div>
             <div class="grid grid-cols-1 gap-y-3">
                 <div class="flex items-end">
                     <span class="font-bold">วันที่เริ่มป่วย:</span> <span id="printOnsetDate" class="ml-2 border-b border-dotted border-black px-2 min-w-[100px] inline-block text-center"></span>
@@ -687,7 +687,6 @@
 
         // --- อัปเดตตัวกรองสัปดาห์ ---
         window.updateWeekFilter = function() {
-            const currentValue = weekFilter.value;
             const currentWeekKey = getWeekKey();
             
             // ดึงสัปดาห์ที่ไม่ซ้ำจากข้อมูล และเรียงจากใหม่ไปเก่า
@@ -705,13 +704,19 @@
                 optionsHtml += `<option value="${week}">${label}</option>`;
             });
             
+            let currentValue = weekFilter.value;
             weekFilter.innerHTML = optionsHtml;
+            
+            // ถ้าเพิ่งโหลดข้อมูลครั้งแรก ให้บังคับเปลี่ยนเป็นสัปดาห์ปัจจุบัน
+            if (typeof window.isWeekFilterInitialized === 'undefined' || !window.isWeekFilterInitialized) {
+                currentValue = currentWeekKey;
+                window.isWeekFilterInitialized = true;
+            }
             
             // ถ้ามีค่าเดิมที่ถูกเลือกอยู่ และค่านั้นมีในตัวเลือก ให้ตั้งค่าเดิม (หรือทั้งหมด)
             if (currentValue && (uniqueWeeks.includes(currentValue) || currentValue === 'all' || currentValue === currentWeekKey)) {
                 weekFilter.value = currentValue;
             } else {
-                // ถ้าเพิ่งเปิดหน้าเว็บ ให้ตั้งเป็นสัปดาห์ปัจจุบัน
                 weekFilter.value = currentWeekKey;
             }
         };
