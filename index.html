@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบันทึกข้อมูล PCR DOESur2026 SSKH</title>
+    <title>ระบบบันทึกข้อมูล PCR DOESur2026 SSKH </title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Prompt -->
@@ -380,9 +380,9 @@
 
         <div class="grid grid-cols-2 gap-y-2 mb-3 text-[11pt]">
             <div><span class="font-bold">หน่วยงานที่ส่งตรวจ:</span> โรงพยาบาลศรีสะเกษ</div>
-            <div><span class="font-bold">ชื่อผู้ส่งตรวจ:</span> นวรัตน์ บุญกัณหา</div>
-            <div><span class="font-bold">เบอร์โทรศัพท์/โทรสาร:</span> 045611503 ต่อ 3013</div>
-            <div><span class="font-bold">Email address:</span> nawa999@gmail.com</div>
+            <div><span class="font-bold">ชื่อผู้ส่งตรวจ:</span> <span id="printSenderName"></span></div>
+            <div><span class="font-bold">เบอร์โทรศัพท์/โทรสาร:</span> 045611503</div>
+            <div><span class="font-bold">Email address:</span> cdcmuangsisaket@gmail.com</div>
         </div>
 
         <div class="border-b-[3px] border-black mb-4"></div>
@@ -717,6 +717,7 @@
             if (currentValue && (uniqueWeeks.includes(currentValue) || currentValue === 'all' || currentValue === currentWeekKey)) {
                 weekFilter.value = currentValue;
             } else {
+                // ถ้าเพิ่งเปิดหน้าเว็บ ให้ตั้งเป็นสัปดาห์ปัจจุบัน
                 weekFilter.value = currentWeekKey;
             }
         };
@@ -833,6 +834,7 @@
             
             const wardName = record.subWard ? `${record.ward} (${record.subWard})` : (record.ward || '');
             document.getElementById('printWardName').innerText = wardName;
+            document.getElementById('printSenderName').innerText = wardName; // Update sender name to ward name
             
             // สร้างบาร์โค้ด HN ถ้าระบุ HN ไว้
             if (record.hn) {
