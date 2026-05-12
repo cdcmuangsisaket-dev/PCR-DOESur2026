@@ -1380,6 +1380,50 @@
                 recordTimeInput.value = `${String(today.getHours()).padStart(2,'0')}:${String(today.getMinutes()).padStart(2,'0')}`;
             }
 
+            // ระบบเลือกเพศอัตโนมัติจากคำนำหน้าชื่อ
+            const fullNameInput = document.getElementById('fullName');
+            if (fullNameInput) {
+                fullNameInput.addEventListener('input', function() {
+                    const nameStr = this.value.trim();
+                    const maleRadio = document.querySelector('input[name="gender"][value="ชาย"]');
+                    const femaleRadio = document.querySelector('input[name="gender"][value="หญิง"]');
+
+                    // ตรวจสอบคำนำหน้าชื่อ
+                    const malePattern = /^(นาย|ด\.ช\.|เด็กชาย)/;
+                    const femalePattern = /^(นาง|นางสาว|น\.ส\.|ด\.ญ\.|เด็กหญิง)/;
+
+                    if (malePattern.test(nameStr)) {
+                        if (maleRadio) maleRadio.checked = true;
+                        
+                        // ล้างเส้นขอบสีแดงถ้ามี
+                        const group = maleRadio.closest('.form-group');
+                        if (group) {
+                            const toggleWrapper = group.querySelector('.bg-slate-100');
+                            if (toggleWrapper) {
+                                toggleWrapper.classList.remove('border-rose-500', 'ring-1', 'ring-rose-500', 'bg-rose-50');
+                                toggleWrapper.classList.add('border-slate-200', 'bg-slate-100');
+                            }
+                            const err = group.querySelector('.error-msg');
+                            if (err) err.remove();
+                        }
+                    } else if (femalePattern.test(nameStr)) {
+                        if (femaleRadio) femaleRadio.checked = true;
+                        
+                        // ล้างเส้นขอบสีแดงถ้ามี
+                        const group = femaleRadio.closest('.form-group');
+                        if (group) {
+                            const toggleWrapper = group.querySelector('.bg-slate-100');
+                            if (toggleWrapper) {
+                                toggleWrapper.classList.remove('border-rose-500', 'ring-1', 'ring-rose-500', 'bg-rose-50');
+                                toggleWrapper.classList.add('border-slate-200', 'bg-slate-100');
+                            }
+                            const err = group.querySelector('.error-msg');
+                            if (err) err.remove();
+                        }
+                    }
+                });
+            }
+
             // ระบบเติมจุดทศนิยมอัตโนมัติสำหรับอุณหภูมิ
             const maxTempInput = document.getElementById('maxTemp');
             if (maxTempInput) {
