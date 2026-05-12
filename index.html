@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ระบบบันทึกข้อมูล PCR DOESur 2026 SSKH </title>
+    <title>ระบบบันทึกข้อมูล PCR DOESur2026</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Font Prompt -->
     <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- JsBarcode สำหรับสร้างบาร์โค้ด -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jsbarcode/3.11.5/JsBarcode.all.min.js"></script>
     <style>
         body {
             font-family: 'Prompt', sans-serif;
@@ -34,22 +36,48 @@
         .check-card input:checked + div svg {
             display: block;
         }
+
+        /* Styles สำหรับการพิมพ์ */
+        @media print {
+            body { background-color: white !important; }
+            /* ปรับลดขอบกระดาษ บน-ล่าง 5mm ซ้าย-ขวา 12mm เพื่อให้อยู่ในหน้าเดียว */
+            @page { size: A4 portrait; margin: 10mm 15mm; }
+            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
+            
+            /* ซ่อนส่วนที่ไม่อยากให้พิมพ์เลยเสมอ */
+            .no-print { display: none !important; }
+            
+            /* --- โหมดพิมพ์ใบส่งตรวจ 2 หน้า (Report Mode) --- */
+            body.print-report #appContainer { display: none !important; }
+            body.print-report #printSummaryArea { display: block !important; }
+            body.print-report #printableArea { display: block !important; }
+            
+            /* แบ่งหน้ากระดาษ */
+            .page-break { page-break-after: always; break-after: page; }
+            
+            #printableArea {
+                font-size: 13pt; /* ปรับขนาดฟอนต์ให้พอดีกระดาษ */
+                color: #000;
+                line-height: 1.4;
+            }
+        }
     </style>
 </head>
 <body class="min-h-screen py-8 px-4 sm:px-6 lg:px-8 text-slate-800 antialiased selection:bg-blue-500 selection:text-white">
 
-    <div class="max-w-5xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative">
+    <!-- ครอบตัว App ทั้งหมดไว้ เพื่อสั่งซ่อนเวลาพิมพ์ -->
+    <div id="appContainer" class="max-w-5xl mx-auto bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden relative print:hidden">
         
-        <!-- Header System -->
-        <div class="bg-slate-900 px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <!-- Header System (ซ่อนตอนพิมพ์) -->
+        <div class="bg-slate-900 px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
             <div>
                 <div class="flex items-center gap-3 mb-1">
                     <div class="bg-blue-500 p-2 rounded-lg">
-                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                     </div>
-                    <h1 class="text-2xl font-bold text-white tracking-wide">PCR DOESur 2026 SSKH </h1>
+                    <h1 class="text-2xl font-bold text-white tracking-wide">PCR DOESur2026</h1>
                 </div>
-                <p class="text-slate-400 text-sm ml-11">ระบบบันทึกข้อมูลการเฝ้าระวังผู้ป่วยทางเดินหายใจรุนแรง</p>
+                <p class="text-slate-400 text-sm ml-11">ระบบบันทึกข้อมูลการเฝ้าระวังผู้ป่วย</p>
             </div>
             
             <div class="flex items-center gap-4">
@@ -64,8 +92,8 @@
             </div>
         </div>
 
-        <!-- Navigation Tabs -->
-        <div class="bg-slate-50 border-b border-slate-200 px-8 flex gap-6">
+        <!-- Navigation Tabs (ซ่อนตอนพิมพ์) -->
+        <div class="bg-slate-50 border-b border-slate-200 px-8 flex gap-6 no-print">
             <button onclick="window.switchTab('formTab')" id="btnFormTab" class="py-4 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors">
                 ฟอร์มบันทึกข้อมูล
             </button>
@@ -80,21 +108,30 @@
                 
                 <!-- SECTION 1 -->
                 <section>
-                    <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-100 ">
-                        <h2 class="text-lg font-semibold text-slate-800 font-medium py-2 px-4 rounded-lg bg-emerald-500/20">1. ข้อมูลทั่วไปของผู้ป่วย (General information) </h2>
+                    <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-100">
+                        <h2 class="text-lg font-semibold text-slate-800">1. ข้อมูลทั่วไปของผู้ป่วย</h2>
                         <span class="text-xs font-medium text-rose-500 bg-rose-50 px-2 py-1 rounded-full">* จำเป็นทุกข้อ</span>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                         <div class="md:col-span-3 form-group">
-                            <label class="block text-sm font-medium text-slate-700 mb-2">วันที่บันทึก</label>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">วันที่เก็บตัวอย่าง (วันที่บันทึก)</label>
                             <input type="date" id="recordDate" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700">
+                        </div>
+                        <div class="md:col-span-2 form-group">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">เวลาที่เก็บ</label>
+                            <input type="time" id="recordTime" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700">
                         </div>
                         <div class="md:col-span-3 form-group">
                             <label class="block text-sm font-medium text-slate-700 mb-2">รหัส HN</label>
                             <input type="text" id="hn" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="ระบุ HN">
                         </div>
-                        <div class="md:col-span-6 form-group">
+                        <div class="md:col-span-4 form-group">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">เลขบัตร ปชช./Passport No.</label>
+                            <input type="text" id="idCard" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="ระบุเลขบัตร ปชช. หรือ Passport">
+                        </div>
+
+                        <div class="md:col-span-5 form-group">
                             <label class="block text-sm font-medium text-slate-700 mb-2">ชื่อ - นามสกุล</label>
                             <input type="text" id="fullName" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="ชื่อ นามสกุล">
                         </div>
@@ -112,10 +149,16 @@
                             </div>
                         </div>
                         <div class="md:col-span-3 form-group">
-                            <label class="block text-sm font-medium text-slate-700 mb-2">อายุ (ปี)</label>
-                            <div class="relative">
-                                <input type="number" id="age" min="0" required class="w-full px-4 py-2.5 pr-10 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="0">
-                                <span class="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 text-sm">ปี</span>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">อายุ</label>
+                            <div class="flex gap-2">
+                                <div class="relative flex-1">
+                                    <input type="number" id="ageYear" min="0" required class="w-full px-3 py-2.5 pr-8 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="0">
+                                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-sm">ปี</span>
+                                </div>
+                                <div class="relative flex-1">
+                                    <input type="number" id="ageMonth" min="0" max="11" class="w-full px-3 py-2.5 pr-10 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="0">
+                                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-slate-400 text-[12px]">เดือน</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -124,7 +167,7 @@
                 <!-- SECTION 2 -->
                 <section>
                     <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-100">
-                        <h2 class="text-lg font-semibold text-slate-800 font-medium py-2 px-4 rounded-lg bg-emerald-500/20">2. อาการทางคลินิก (Clinical Signs)</h2>
+                        <h2 class="text-lg font-semibold text-slate-800">2. อาการทางคลินิก (Clinical Signs)</h2>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -181,12 +224,40 @@
                 <!-- SECTION 3 -->
                 <section>
                     <div class="flex items-center gap-2 mb-6 pb-2 border-b border-slate-100">
-                        <h2 class="text-lg font-semibold text-slate-800 font-medium py-2 px-4 rounded-lg bg-emerald-500/20">3. การรักษาและการวินิจฉัย (Treatment and diagnosis)</h2>
+                        <h2 class="text-lg font-semibold text-slate-800">3. สิ่งส่งตรวจ และ การรักษา</h2>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
+                        
+                        <!-- ชนิดสิ่งส่งตรวจ -->
                         <div class="md:col-span-12 form-group">
-                            <label class="block text-sm font-medium text-slate-700 mb-2">รักษาที่ตึก</label>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">ชนิดสิ่งส่งตรวจ <span class="text-rose-500">*</span></label>
+                            <div class="flex flex-wrap gap-3">
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="specimen" value="UTM+NPS+TS" class="peer sr-only" required>
+                                    <div class="py-2 px-4 rounded-lg border border-slate-200 text-sm text-slate-600 font-medium transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50 shadow-sm">UTM+NPS+TS</div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="specimen" value="VTM+NPS+TS" class="peer sr-only" required>
+                                    <div class="py-2 px-4 rounded-lg border border-slate-200 text-sm text-slate-600 font-medium transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50 shadow-sm">VTM+NPS+TS</div>
+                                </label>
+                                <label class="cursor-pointer relative">
+                                    <input type="radio" name="specimen" value="whole blood" class="peer sr-only" required>
+                                    <div class="py-2 px-4 rounded-lg border border-slate-200 text-sm text-slate-600 font-medium transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50 shadow-sm">whole blood</div>
+                                </label>
+                                <div class="flex items-center gap-2 flex-1 min-w-[250px]">
+                                    <label class="cursor-pointer relative shrink-0">
+                                        <input type="radio" name="specimen" value="อื่นๆ" class="peer sr-only" required>
+                                        <div class="py-2 px-4 rounded-lg border border-slate-200 text-sm text-slate-600 font-medium transition-all peer-checked:bg-blue-600 peer-checked:text-white peer-checked:border-blue-600 hover:bg-slate-50 shadow-sm">อื่นๆ ระบุ</div>
+                                    </label>
+                                    <input type="text" id="specimenOther" class="flex-1 w-full px-4 py-2 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400 disabled:bg-slate-100 disabled:text-slate-400 shadow-sm" placeholder="..." disabled>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- รักษาที่ตึก -->
+                        <div class="md:col-span-12 form-group border-t border-slate-100 pt-6">
+                            <label class="block text-sm font-medium text-slate-700 mb-2">รักษาที่ตึก <span class="text-rose-500">*</span></label>
                             <div class="grid grid-cols-3 sm:grid-cols-5 gap-2">
                                 <label class="cursor-pointer relative">
                                     <input type="radio" name="ward" value="ICU" class="peer sr-only" required>
@@ -220,13 +291,13 @@
 
                         </div>
                         <div class="md:col-span-12 form-group">
-                            <label class="block text-sm font-medium text-slate-700 mb-2">การวินิจฉัยโรค (Diagnosis)</label>
+                            <label class="block text-sm font-medium text-slate-700 mb-2">การวินิจฉัยโรค (Diagnosis) <span class="text-rose-500">*</span></label>
                             <input type="text" id="diagnosis" required class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:bg-white focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition-all outline-none text-slate-700 placeholder-slate-400" placeholder="ระบุการวินิจฉัยโรคเบื้องต้น">
                         </div>
                     </div>
                 </section>
 
-                <div class="pt-6 mt-6 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-center justify-end gap-3">
+                <div class="pt-6 mt-6 border-t border-slate-100 flex flex-col-reverse sm:flex-row items-center justify-end gap-3 no-print">
                     <button type="button" onclick="window.cancelEdit()" id="cancelEditBtn" class="hidden w-full sm:w-auto px-6 py-2.5 text-slate-600 bg-slate-100 hover:bg-slate-200 font-medium rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-slate-300">
                         ยกเลิกการแก้ไข
                     </button>
@@ -238,20 +309,20 @@
             </form>
 
             <!-- หน้าแจ้งเตือนโควตาเต็ม -->
-            <div id="quotaFullMessage" class="hidden p-12 flex flex-col items-center justify-center text-center min-h-[400px]">
+            <div id="quotaFullMessage" class="hidden p-12 flex flex-col items-center justify-center text-center min-h-[400px] no-print">
                 <div class="bg-amber-100 text-amber-500 rounded-full p-5 mb-6 shadow-sm border-4 border-white">
                     <svg class="w-16 h-16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg>
                 </div>
-                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4 tracking-tight">PCR DOESur 2026 ครบ 5 รายในสัปดาห์นี้แล้ว</h2>
+                <h2 class="text-2xl md:text-3xl font-bold text-slate-800 mb-4 tracking-tight">PCR DOESur2026 ครบ 5 รายในสัปดาห์นี้แล้ว</h2>
                 <p class="text-slate-500 text-lg max-w-lg leading-relaxed">
-                    ระบบได้ทำการปิดรับข้อมูล<br>
-                    <span class="block mt-4 text-2xl md:text-2xl font-bold text-rose-600">ระบบจะเปิดให้บันทึกข้อมูลรอบใหม่ ในวันพฤหัสบดี</span>
+                    ระบบได้ทำการปิดรับข้อมูลใหม่สำหรับสัปดาห์นี้<br>
+                    <span class="block mt-4 text-2xl md:text-3xl font-bold text-rose-600">ระบบจะเปิดให้บันทึกข้อมูลรอบใหม่ ในวันพฤหัสบดีถัดไป</span>
                 </p>
             </div>
         </div>
 
         <!-- TAB 2: List Content -->
-        <div id="listSection" class="hidden p-8">
+        <div id="listSection" class="hidden p-8 no-print">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6 gap-4">
                 <h2 class="text-xl font-bold text-slate-800">รายการข้อมูลที่บันทึก</h2>
                 <div class="flex items-center gap-3 w-full sm:w-auto">
@@ -293,8 +364,204 @@
 
     </div>
 
+    <!-- หน้าพิมพ์ 1: ฟอร์มสรุปข้อมูล (แบบจำลองเอกสาร) -->
+    <div id="printSummaryArea" class="hidden bg-white text-black p-8 w-full max-w-4xl mx-auto page-break">
+        
+        <!-- Header -->
+        <div class="text-center mb-6">
+            <h2 class="text-[15pt] font-bold mb-1">PCR DOESur 2026 SSKH</h2>
+            <h3 class="text-[13pt] font-bold">แบบสอบการเฝ้าระวังผู้ป่วยทางเดินหายใจรุนแรง โรงพยาบาลศรีสะเกษ</h3>
+        </div>
+
+        <!-- Section 1 -->
+        <div class="mb-5 space-y-3 text-[12pt]">
+            <h3 class="font-bold text-[13pt]">1. ข้อมูลทั่วไปของผู้ป่วย (General information)</h3>
+            <div class="flex items-end">
+                <span>วันที่เก็บตัวอย่าง :</span>
+                <span id="sumRecordDate" class="border-b border-dotted border-black ml-2 px-2 text-center" style="width: 120px;"></span>
+                <span class="ml-4">เวลาที่เก็บ :</span>
+                <span id="sumRecordTime" class="border-b border-dotted border-black ml-2 px-2 text-center" style="width: 80px;"></span>
+                <span class="ml-4">รหัส HN :</span>
+                <span id="sumHn" class="flex-1 border-b border-dotted border-black ml-2 px-2 text-center font-bold"></span>
+            </div>
+            <div class="flex items-end">
+                <span>เลขบัตร ปชช./Passport No :</span>
+                <span id="sumIdCard" class="w-1/2 border-b border-dotted border-black ml-2 px-2 text-center"></span>
+            </div>
+            <div class="flex items-end">
+                <span>ชื่อ – นามสกุล :</span>
+                <span id="sumFullName" class="flex-1 border-b border-dotted border-black ml-2 px-2"></span>
+            </div>
+            <div class="flex items-end">
+                <span>เพศ :</span>
+                <span id="sumGender" class="border-b border-dotted border-black ml-2 px-2 text-center" style="width: 80px;"></span>
+                <span class="ml-4">อายุ :</span>
+                <span id="sumAge" class="border-b border-dotted border-black ml-2 px-2 text-center" style="width: 120px;"></span>
+            </div>
+        </div>
+
+        <!-- Section 2 -->
+        <div class="mb-5 space-y-3 text-[12pt] mt-6">
+            <h3 class="font-bold text-[13pt]">2. อาการทางคลินิก (Clinical Signs)</h3>
+            <div class="flex items-end">
+                <span>วันที่เริ่มป่วย :</span>
+                <span id="sumOnsetDate" class="border-b border-dotted border-black ml-2 px-2 text-center" style="width: 120px;"></span>
+                <span class="ml-4">ป่วยมาแล้ว :</span>
+                <span id="sumSickDays" class="border-b border-dotted border-black ml-2 px-2 text-center" style="width: 60px;"></span>
+                <span class="ml-2">วัน</span>
+                <span class="ml-4">อุณหภูมิสูงสุด :</span>
+                <span id="sumMaxTemp" class="flex-1 border-b border-dotted border-black ml-2 px-2 text-center"></span>
+                <span class="ml-2">(°C)</span>
+            </div>
+            <div class="flex items-end">
+                <span>อาการ :</span>
+                <span id="sumSymptomsText" class="flex-1 border-b border-dotted border-black ml-2 px-2"></span>
+            </div>
+        </div>
+
+        <!-- Section 3 -->
+        <div class="mb-5 space-y-3 text-[12pt] mt-6">
+            <h3 class="font-bold text-[13pt]">3. สิ่งส่งตรวจ และ การรักษา</h3>
+            <div class="flex items-end">
+                <span>ชนิดสิ่งส่งตรวจ :</span>
+                <span id="sumSpecimen" class="flex-1 border-b border-dotted border-black ml-2 px-2"></span>
+            </div>
+            <div class="flex items-end">
+                <span>รักษาที่ตึก :</span>
+                <span id="sumWard" class="flex-1 border-b border-dotted border-black ml-2 px-2"></span>
+            </div>
+            <div class="flex items-end">
+                <span>การวินิจฉัยโรคเบื้องต้น (Diagnosis) :</span>
+                <span id="sumDiagnosis" class="flex-1 border-b border-dotted border-black ml-2 px-2"></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- หน้าพิมพ์ 2: ใบส่งตรวจ สคร.10 -->
+    <div id="printableArea" class="hidden bg-white text-black p-4 pb-4 w-full max-w-4xl mx-auto">
+        <!-- หัวกระดาษ: ตึกมุมซ้ายบน และ รหัสกำกับเอกสาร มุมขวาบน -->
+        <div class="flex justify-between items-start text-[11px] font-bold mb-3">
+            <div>
+                ตึกที่ส่งตรวจ: <span id="printWardName" class="border-b border-dotted border-black px-2 min-w-[120px] inline-block text-center text-sm"></span>
+            </div>
+            <div class="text-right">
+                F-VB/EID-013<br>Rev.01 28/11/2566
+            </div>
+        </div>
+        
+        <!-- หัวเอกสาร -->
+        <div class="text-center mb-6">
+            <h1 class="text-xl font-bold mb-1">โครงการ PCR-DOESur2026</h1>
+            <h2 class="text-[15px] font-bold mb-1">แบบขอส่งตรวจทางห้องปฏิบัติการโรคอุบัติใหม่อุบัติซ้ำ และโรคติดต่อนำโดยแมลง</h2>
+            <h3 class="text-[15px] font-bold">กลุ่มห้องปฏิบัติการฯ สคร.10 จ.อุบลฯ</h3>
+        </div>
+
+        <!-- ข้อมูลหน่วยงานส่งตรวจ -->
+        <div class="grid grid-cols-2 gap-y-2 mb-4 text-[13px]">
+            <div><span class="font-bold">หน่วยงานที่ส่งตรวจ:</span> โรงพยาบาลศรีสะเกษ</div>
+            <div><span class="font-bold">ชื่อผู้ส่งตรวจ:</span> นวรัตน์ บุญกัณหา</div>
+            <div><span class="font-bold">เบอร์โทรศัพท์/โทรสาร:</span> 045611503 ต่อ 3013</div>
+            <div><span class="font-bold">Email address:</span> nawa999@gmail.com</div>
+        </div>
+
+        <div class="border-b-2 border-black my-4"></div>
+
+        <!-- ข้อมูลผู้ป่วย (จำลองโครงสร้างเดิม) -->
+        <div class="grid grid-cols-2 gap-y-3 mb-4 text-[13px] items-end">
+            <div class="col-span-2">
+                <span class="font-bold">ชื่อ-สกุล:</span> <span id="printName" class="ml-2 border-b border-dotted border-black px-2 min-w-[250px] inline-block"></span>
+            </div>
+            <div>
+                <span class="font-bold">เพศ:</span> <span id="printGender" class="ml-2 border-b border-dotted border-black px-2 min-w-[80px] inline-block text-center"></span>
+            </div>
+            <div>
+                <span class="font-bold">อายุ:</span> <span id="printAge" class="ml-2 border-b border-dotted border-black px-2 min-w-[80px] inline-block text-center"></span>
+            </div>
+            <div>
+                <span class="font-bold">เลขบัตร ปชช./Passport No.:</span> <span id="printIdCard" class="ml-2 border-b border-dotted border-black px-2 min-w-[150px] inline-block text-center"></span>
+            </div>
+            <div>
+                <span class="font-bold">สิทธิ์การรักษา:</span> <span class="ml-2 border-b border-dotted border-black px-2 min-w-[150px] inline-block"></span>
+            </div>
+            <div class="col-span-2 flex items-center">
+                <span class="font-bold">HN:</span> 
+                <span id="printHn" class="ml-2 border-b border-dotted border-black px-2 min-w-[150px] inline-block text-center text-[15px] font-bold"></span>
+                <!-- จุดแสดงบาร์โค้ด HN -->
+                <svg id="printBarcode" class="ml-4 h-8"></svg>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-y-3 mb-5 text-[13px]">
+            <div>
+                <span class="font-bold">วันที่เก็บสิ่งส่งตรวจ:</span> <span id="printCollectDate" class="ml-2 border-b border-dotted border-black px-2 min-w-[100px] inline-block text-center"></span>
+            </div>
+            <div>
+                <span class="font-bold">เวลา:</span> <span id="printCollectTime" class="ml-2 border-b border-dotted border-black px-2 min-w-[80px] inline-block text-center"></span> น.
+            </div>
+            <div>
+                <span class="font-bold">วันที่ส่งสิ่งส่งตรวจ:</span> <span id="printSendDate" class="ml-2 border-b border-dotted border-black px-2 min-w-[100px] inline-block text-center"></span>
+            </div>
+            <div>
+                <span class="font-bold">เวลา:</span> <span id="printSendTime" class="ml-2 border-b border-dotted border-black px-2 min-w-[80px] inline-block text-center"></span> น.
+            </div>
+        </div>
+
+        <!-- ชนิดสิ่งส่งตรวจ (แสดงเฉพาะอันที่เลือก) -->
+        <div class="mb-5 text-[13px] flex items-center">
+            <span class="font-bold mr-4">ชนิดสิ่งส่งตรวจ:</span> 
+            <span id="printSpecimenResult"></span>
+        </div>
+
+        <div class="border-b-2 border-black my-4"></div>
+
+        <!-- รายการตรวจ 2 คอลัมน์ (ตามใบต้นฉบับ) -->
+        <h3 class="font-bold text-[14px] mb-3">รายการตรวจ</h3>
+        <div class="grid grid-cols-2 gap-x-6 gap-y-2.5 text-[11px] mb-6">
+            <!-- ฝั่งซ้าย -->
+            <div>
+                <div class="mb-2">( ) สารพันธุกรรมเชื้อ SARS-COV-2 (COVID-19) 3 genes</div>
+                <div class="mb-2">( ) Anti-SARS-CoV-2 (total Antibody; IgG/IgM)</div>
+                <div class="mb-2">( ) สารพันธุกรรมเชื้อ SARS-CoV-2 (2 genes)-FluA-FluB</div>
+                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Influenza A/B, pandemic 2009 H1N1</div>
+                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Influenza A/B & RSV nucleic acid test</div>
+                <div class="mb-2">( ) Respiratory panel 1 (influenza A/B, RSV A/B, FluA-H1, FluA-H1pdm09, FluA-H3)</div>
+                <div class="mb-2">( ) Respiratory panel 2 (Adenovirus, Enterovirus, Parainfluenza virus 1,2,3,4, Metapneumovirus)</div>
+                <div class="mb-2">( ) Respiratory panel 3 (Bocavirus, Rhinovirus, Coronavirus NL63, Coronavirus 229E, Coronavirus OC43)</div>
+                <div class="mb-2">( ) Respiratory panel 4 (M.pneumoniae, C.pneumoniae, L.pneumophila, H.influenzae, S.pneumoniae, B.pertussis, B.parapertussis)</div>
+                <div class="mb-2">( ) RP 26 (Respiratory panel 1-4)</div>
+                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Dengue virus (แยก 4 serotypes)</div>
+                <div class="mb-2">( ) Dengue Ab (IgG/IgM)</div>
+                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Zika+Dengue+Chikungunya</div>
+            </div>
+            <!-- ฝั่งขวา -->
+            <div>
+                <div class="mb-2">( ) สารพันธุกรรมเชื้อ CT/NG (หนองในเทียม/หนองใน)</div>
+                <div class="mb-2">( ) qualitative HIV RNA</div>
+                <div class="mb-2">( ) HIV-Viral load (HIV-VL)</div>
+                <div class="mb-2">( ) Anti-HCV</div>
+                <div class="mb-2">( ) HCV genotype</div>
+                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Malaria (แยก 5 species)</div>
+                <div class="mb-2">( ) NS1 Ag (Dengue)</div>
+                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Chikungunya virus</div>
+                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Zika virus</div>
+                <div class="mb-2">( ) GC culture & DST</div>
+                <div class="mb-2">( ) CD4</div>
+                <div class="mb-2">( ) HIV-drug resistance Deep sequencing (Next generation system)</div>
+                <div class="mb-2">( ) HCV-Viral load (HCV-VL)</div>
+                <!-- รายการที่มีการติ๊กไว้แล้ว -->
+                <div class="font-bold text-[12px]">( ✓ ) อื่นๆ ระบุ.. PCR Respiratory Pathogen 23</div>
+            </div>
+        </div>
+
+        <!-- หมายเหตุล่างฟอร์ม -->
+        <div class="text-[11px] leading-relaxed border-t border-slate-300 pt-4 mt-6">
+            <span class="font-bold">หมายเหตุ:</span> กรุณากรอกข้อมูลให้ครบถ้วน หากมีข้อสงสัย/ซักถาม สามารถติดต่อเจ้าหน้าที่ได้ที่เบอร์ 045-243127, 045-255836, 096-1892273, 083-0883871, 0935539119, email address: labaids_dpc10@yahoo.com, labtb_dpc10@yahoo.com<br>
+            <span class="font-bold mt-1 inline-block">: กรณีโรคระบาด / โรคอุบัติใหม่ / โรคอุบัติซ้ำ กรุณาแนบข้อมูลการสอบสวนโรคด้วยทุกครั้ง หากไม่มีแบบสอบสวนโรค จะมีการเรียกเก็บค่าตรวจ</span>
+        </div>
+    </div>
+
     <!-- Modal Success -->
-    <div id="successModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity">
+    <div id="successModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity no-print">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-sm mx-auto transform transition-all scale-95 opacity-0" id="modalContent">
             <div class="flex items-center justify-center mb-4">
                 <div class="bg-emerald-100 text-emerald-600 rounded-full p-3">
@@ -302,7 +569,7 @@
                 </div>
             </div>
             <h3 id="modalTitle" class="text-lg font-bold text-center text-slate-800 mb-2">บันทึกข้อมูลเรียบร้อย</h3>
-            <p id="modalDesc" class="text-sm text-slate-500 text-center mb-6">ระบบทำการจัดเก็บข้อมูลผู้ป่วยแล้ว</p>
+            <p id="modalDesc" class="text-sm text-slate-500 text-center mb-6">ระบบทำการจัดเก็บข้อมูลผู้ป่วยเข้าฐานข้อมูลแล้ว</p>
             <button onclick="window.closeModal()" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-medium py-2.5 px-4 rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-slate-400">
                 ตกลง
             </button>
@@ -310,7 +577,7 @@
     </div>
 
     <!-- Modal Password Authentication -->
-    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity">
+    <div id="authModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity no-print">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-sm mx-auto transform transition-all scale-95 opacity-0" id="authModalContent">
             <div class="flex items-center justify-center mb-4">
                 <div class="bg-blue-100 text-blue-600 rounded-full p-4">
@@ -333,7 +600,7 @@
     </div>
 
     <!-- Modal Delete Confirm -->
-    <div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity">
+    <div id="deleteModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity no-print">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-sm mx-auto" id="deleteModalContent">
             <div class="flex items-center justify-center mb-4">
                 <div class="bg-rose-100 text-rose-600 rounded-full p-3">
@@ -426,7 +693,7 @@
                     if (!isFirebaseReady) {
                         isFirebaseReady = true;
                         document.getElementById('statusDot').classList.replace('bg-amber-400', 'bg-emerald-400');
-                        document.getElementById('statusText').innerText = 'หากพบปัญหา โทร 3215';
+                        document.getElementById('statusText').innerText = 'Connected (Cloud)';
                         window.cancelEdit(); 
                     }
 
@@ -571,16 +838,25 @@
                     const displayWard = row.subWard ? `${row.ward} (${row.subWard})` : row.ward;
                     
                     tr.innerHTML = `
-                        <td class="py-3 px-4">${row.recordDate || '-'}</td>
+                        <td class="py-3 px-4">
+                            ${row.recordDate || '-'}
+                            ${row.recordTime ? `<br><span class="text-xs text-slate-400">${row.recordTime} น.</span>` : ''}
+                        </td>
                         <td class="py-3 px-4 font-medium text-slate-800">${row.hn || '-'}</td>
                         <td class="py-3 px-4">${row.name || '-'}</td>
                         <td class="py-3 px-4"><span class="bg-blue-50 text-blue-600 px-2.5 py-1 rounded-md text-xs font-medium">${displayWard || '-'}</span></td>
                         <td class="py-3 px-4 truncate max-w-[150px]" title="${row.diagnosis || ''}">${row.diagnosis || '-'}</td>
                         <td class="py-3 px-4 text-center">
                             <div class="flex items-center justify-center gap-2">
+                                <!-- ปุ่มพิมพ์ใบรายงาน 2 หน้า -->
+                                <button onclick="window.printDocument('${row.id}')" class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="พิมพ์แบบฟอร์มและใบส่งตรวจ">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
+                                </button>
+                                <!-- ปุ่มแก้ไข -->
                                 <button onclick="window.requestAuth('edit', '${row.id}')" class="p-1.5 text-slate-400 hover:text-amber-500 hover:bg-amber-50 rounded-lg transition-colors" title="แก้ไข">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path></svg>
                                 </button>
+                                <!-- ปุ่มลบ -->
                                 <button onclick="window.requestAuth('delete', '${row.id}')" class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="ลบ">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path></svg>
                                 </button>
@@ -594,6 +870,144 @@
 
         // จับเหตุการณ์เมื่อเปลี่ยนสัปดาห์ใน Dropdown
         weekFilter.addEventListener('change', window.renderTable);
+
+        // --- ระบบพิมพ์ใบ 2 หน้า (หน้าฟอร์มสรุป + หน้า สคร.10) ---
+        window.printDocument = function(id) {
+            const record = pcrData.find(r => r.id === id);
+            if (!record) return;
+
+            // --- เตรียมข้อมูลสำหรับ "หน้าพิมพ์ 1: ฟอร์มสรุปข้อมูล" ---
+            
+            // จัดรูปแบบวันที่ต่างๆ ให้อ่านง่าย
+            let collectDateFormatted = '-';
+            if (record.recordDate) {
+                const parts = record.recordDate.split('-');
+                if (parts.length === 3) collectDateFormatted = `${parts[2]}/${parts[1]}/${parseInt(parts[0]) + 543}`;
+            }
+            let onsetDateFormatted = '-';
+            if (record.onsetDate) {
+                const parts = record.onsetDate.split('-');
+                if (parts.length === 3) onsetDateFormatted = `${parts[2]}/${parts[1]}/${parseInt(parts[0]) + 543}`;
+            }
+            
+            // คำนวณป่วยมาแล้ว ... วัน
+            let sickDays = '-';
+            if (record.recordDate && record.onsetDate) {
+                const rDate = new Date(record.recordDate);
+                const oDate = new Date(record.onsetDate);
+                const diffTime = rDate - oDate;
+                if (diffTime >= 0) {
+                    sickDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                } else {
+                    sickDays = 0;
+                }
+            }
+
+            document.getElementById('sumRecordDate').innerText = collectDateFormatted;
+            document.getElementById('sumRecordTime').innerText = record.recordTime ? record.recordTime + ' น.' : '-';
+            document.getElementById('sumHn').innerText = record.hn || '-';
+            document.getElementById('sumIdCard').innerText = record.idCard || '-';
+            document.getElementById('sumFullName').innerText = record.name || '-';
+            document.getElementById('sumGender').innerText = record.gender || '-';
+            
+            // รวม ปี และ เดือน
+            let ageStr = '';
+            if (record.ageYear) ageStr += `${record.ageYear} ปี `;
+            if (record.ageMonth) ageStr += `${record.ageMonth} เดือน`;
+            if (!ageStr && record.age) ageStr = `${record.age} ปี`; // รองรับข้อมูลเก่า
+            document.getElementById('sumAge').innerText = ageStr.trim() || '-';
+            
+            document.getElementById('sumOnsetDate').innerText = onsetDateFormatted;
+            document.getElementById('sumSickDays').innerText = sickDays;
+            document.getElementById('sumMaxTemp').innerText = record.maxTemp || '-';
+            
+            const wardName = record.subWard ? `${record.ward} (${record.subWard})` : (record.ward || '-');
+            document.getElementById('sumWard').innerText = wardName;
+            document.getElementById('sumDiagnosis').innerText = record.diagnosis || '-';
+            
+            const specText = record.specimen === 'อื่นๆ' ? `อื่นๆ ระบุ: ${record.specimenOther || '-'}` : (record.specimen || '-');
+            document.getElementById('sumSpecimen').innerText = specText;
+
+            // แสดงอาการ เป็น Text เรียงต่อกัน
+            document.getElementById('sumSymptomsText').innerText = record.symptoms && record.symptoms.length > 0 ? record.symptoms.join(', ') : '-';
+
+
+            // --- เตรียมข้อมูลสำหรับ "หน้าพิมพ์ 2: ใบส่งตรวจ สคร.10" ---
+            
+            document.getElementById('printName').innerText = record.name || '';
+            document.getElementById('printGender').innerText = record.gender || '';
+            document.getElementById('printAge').innerText = ageStr.trim() || '';
+            document.getElementById('printHn').innerText = record.hn || '';
+            document.getElementById('printIdCard').innerText = record.idCard || '';
+            document.getElementById('printWardName').innerText = wardName;
+            
+            if (record.hn) {
+                JsBarcode("#printBarcode", record.hn, {
+                    format: "CODE128", displayValue: false, height: 25, width: 1.5, margin: 0
+                });
+                document.getElementById('printBarcode').style.display = 'block';
+            } else {
+                document.getElementById('printBarcode').style.display = 'none';
+            }
+            
+            const specResultEl = document.getElementById('printSpecimenResult');
+            if (specResultEl) {
+                if (record.specimen === 'อื่นๆ') {
+                    specResultEl.innerHTML = `( ✓ ) อื่นๆระบุ <span class="border-b border-dotted border-black min-w-[150px] inline-block px-2 text-center">${record.specimenOther || ''}</span>`;
+                } else if (record.specimen) {
+                    specResultEl.innerHTML = `( ✓ ) ${record.specimen}`;
+                } else {
+                    specResultEl.innerHTML = '';
+                }
+            }
+            
+            document.getElementById('printCollectDate').innerText = collectDateFormatted === '-' ? '' : collectDateFormatted;
+            document.getElementById('printCollectTime').innerText = record.recordTime || '-';
+
+            const now = new Date();
+            const sendDay = String(now.getDate()).padStart(2, '0');
+            const sendMonth = String(now.getMonth() + 1).padStart(2, '0');
+            const sendThaiYear = now.getFullYear() + 543;
+            document.getElementById('printSendDate').innerText = `${sendDay}/${sendMonth}/${sendThaiYear}`;
+            document.getElementById('printSendTime').innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+            // สั่งพิมพ์ (เปิดคลาสที่ใช้โชว์ 2 หน้ากระดาษ)
+            document.body.classList.add('print-report');
+            setTimeout(() => {
+                window.print();
+            }, 100);
+        }
+
+        // ล้างคลาสหลังพิมพ์เสร็จ เพื่อให้หน้าเว็บกลับมาปกติ
+        window.onafterprint = function() {
+            document.body.classList.remove('print-report');
+        };
+
+        // --- ระบบเปิดปิดช่องกรอก อื่นๆ ระบุ (สิ่งส่งตรวจ) ---
+        document.querySelectorAll('input[name="specimen"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                const otherInput = document.getElementById('specimenOther');
+                if (e.target.value === 'อื่นๆ') {
+                    otherInput.disabled = false;
+                    otherInput.required = true;
+                    otherInput.focus();
+                } else {
+                    otherInput.disabled = true;
+                    otherInput.required = false;
+                    otherInput.value = '';
+                    otherInput.classList.remove('border-rose-500', 'ring-1', 'ring-rose-500');
+                }
+                
+                // ล้าง error สีแดง
+                const group = e.target.closest('.form-group');
+                if (group) {
+                    const wrap = group.querySelector('.flex-wrap');
+                    if (wrap) wrap.classList.remove('border-rose-500', 'ring-1', 'ring-rose-500', 'p-1', 'rounded-lg');
+                    const err = group.querySelector('.error-msg');
+                    if (err) err.remove();
+                }
+            });
+        });
 
         // --- ระบบสร้างตัวเลือกตึกย่อย ---
         window.renderSubWards = function(wardValue, selectedSubWard = null) {
@@ -681,14 +1095,16 @@
                 const inputs = group.querySelectorAll('input');
                 inputs.forEach(input => {
                     input.classList.remove('border-rose-500', 'ring-1', 'ring-rose-500');
-                    if(input.type !== 'radio' && input.type !== 'checkbox') input.classList.add('border-slate-300');
+                    if(input.type !== 'radio' && input.type !== 'checkbox' && input.type !== 'time') input.classList.add('border-slate-300');
                 });
                 
                 // สำหรับ Radio ทั่วไป
-                const toggleWrapper = group.querySelector('.bg-slate-100'); 
+                const toggleWrapper = group.querySelector('.bg-slate-100, .flex-wrap'); 
                 if (toggleWrapper) {
-                    toggleWrapper.classList.remove('border-rose-500', 'ring-1', 'ring-rose-500', 'bg-rose-50');
-                    toggleWrapper.classList.add('border-slate-200', 'bg-slate-100');
+                    toggleWrapper.classList.remove('border-rose-500', 'ring-1', 'ring-rose-500', 'bg-rose-50', 'p-1', 'rounded-lg');
+                    if (!toggleWrapper.classList.contains('flex-wrap')) {
+                        toggleWrapper.classList.add('border-slate-200', 'bg-slate-100');
+                    }
                 }
 
                 // สำหรับ SubWard
@@ -758,11 +1174,11 @@
                     const group = el.closest('.form-group') || el.closest('#subWardContainer');
                     if (group) {
                         if (el.type === 'radio') {
-                            // ดักจับกรณีเป็นตึกย่อย หรือตึกหลัก
-                            const toggleWrapper = el.closest('#subWardGrid') || group.querySelector('.bg-slate-100, .grid');
+                            // ดักจับกรณีเป็นตึกย่อย หรือตึกหลัก หรือสิ่งส่งตรวจ
+                            const toggleWrapper = el.closest('#subWardGrid') || group.querySelector('.bg-slate-100, .grid, .flex-wrap');
                             if (toggleWrapper) {
                                 toggleWrapper.classList.add('border-rose-500', 'ring-1', 'ring-rose-500');
-                                if(toggleWrapper.id === 'subWardGrid') toggleWrapper.classList.add('p-1', 'rounded-lg');
+                                if(toggleWrapper.id === 'subWardGrid' || toggleWrapper.classList.contains('flex-wrap')) toggleWrapper.classList.add('p-1', 'rounded-lg');
                             }
                         } else {
                             el.classList.replace('border-slate-300', 'border-rose-500');
@@ -835,6 +1251,11 @@
             const subWardInput = document.querySelector('input[name="subWard"]:checked');
             const subWard = subWardInput && !document.getElementById('subWardContainer').classList.contains('hidden') ? subWardInput.value : '';
 
+            // อ่านค่าสิ่งส่งตรวจ
+            const specimenRadio = document.querySelector('input[name="specimen"]:checked');
+            const specimen = specimenRadio ? specimenRadio.value : '';
+            const specimenOther = document.getElementById('specimenOther').value;
+
             submitBtn.disabled = true;
             submitText.innerText = "กำลังบันทึก...";
 
@@ -844,15 +1265,20 @@
                     weekKey: editingId && existingRecord && existingRecord.weekKey ? existingRecord.weekKey : getWeekKey(),
                     createdAt: editingId && existingRecord && existingRecord.createdAt ? existingRecord.createdAt : Date.now(),
                     recordDate: document.getElementById('recordDate').value,
+                    recordTime: document.getElementById('recordTime').value, 
                     hn: document.getElementById('hn').value,
+                    idCard: document.getElementById('idCard').value,
                     name: document.getElementById('fullName').value,
                     gender: document.querySelector('input[name="gender"]:checked').value,
-                    age: document.getElementById('age').value,
+                    ageYear: document.getElementById('ageYear').value || '0', // บันทึกอายุ (ปี)
+                    ageMonth: document.getElementById('ageMonth').value || '0', // บันทึกอายุ (เดือน)
                     onsetDate: document.getElementById('onsetDate').value,
                     maxTemp: document.getElementById('maxTemp').value,
                     symptoms: symptoms,
+                    specimen: specimen,
+                    specimenOther: specimenOther,
                     ward: document.querySelector('input[name="ward"]:checked').value,
-                    subWard: subWard, // บันทึกตึกย่อย
+                    subWard: subWard, 
                     diagnosis: document.getElementById('diagnosis').value
                 };
 
@@ -860,11 +1286,11 @@
                     const docRef = doc(db, 'pcr_records', editingId);
                     await updateDoc(docRef, record);
                     document.getElementById('modalTitle').innerText = 'อัปเดตข้อมูลเรียบร้อย';
-                    document.getElementById('modalDesc').innerText = 'ระบบได้ปรับปรุงข้อมูลแล้ว';
+                    document.getElementById('modalDesc').innerText = 'ระบบได้ปรับปรุงข้อมูลในฐานข้อมูล Cloud แล้ว';
                 } else {
                     await addDoc(dbCollection, record);
                     document.getElementById('modalTitle').innerText = 'บันทึกข้อมูลเรียบร้อย';
-                    document.getElementById('modalDesc').innerText = 'ระบบทำการจัดเก็บข้อมูลแล้ว';
+                    document.getElementById('modalDesc').innerText = 'ระบบทำการจัดเก็บข้อมูลเข้าฐานข้อมูล Cloud แล้ว';
                 }
                 
                 successModal.classList.remove('hidden');
@@ -897,7 +1323,9 @@
 
                 // เติมข้อมูลลงช่องต่างๆ อย่างปลอดภัย
                 if(document.getElementById('recordDate')) document.getElementById('recordDate').value = data.recordDate || '';
+                if(document.getElementById('recordTime')) document.getElementById('recordTime').value = data.recordTime || '';
                 if(document.getElementById('hn')) document.getElementById('hn').value = data.hn || '';
+                if(document.getElementById('idCard')) document.getElementById('idCard').value = data.idCard || '';
                 if(document.getElementById('fullName')) document.getElementById('fullName').value = data.name || '';
                 
                 if (data.gender) {
@@ -905,7 +1333,10 @@
                     if (gRadio) gRadio.checked = true;
                 }
                 
-                if(document.getElementById('age')) document.getElementById('age').value = data.age || '';
+                // ดึงค่า ปี และ เดือน (รองรับข้อมูลเก่าที่เก็บเป็น age ด้วย)
+                if(document.getElementById('ageYear')) document.getElementById('ageYear').value = data.ageYear !== undefined ? data.ageYear : (data.age || '');
+                if(document.getElementById('ageMonth')) document.getElementById('ageMonth').value = data.ageMonth || '';
+                
                 if(document.getElementById('onsetDate')) document.getElementById('onsetDate').value = data.onsetDate || '';
                 if(document.getElementById('maxTemp')) document.getElementById('maxTemp').value = data.maxTemp || '';
                 
@@ -918,6 +1349,21 @@
                     }
                 }
                 
+                // สิ่งส่งตรวจ
+                if (data.specimen) {
+                    const specRadio = document.querySelector(`input[name="specimen"][value="${data.specimen}"]`);
+                    if (specRadio) {
+                        specRadio.checked = true;
+                        if (data.specimen === 'อื่นๆ') {
+                            document.getElementById('specimenOther').disabled = false;
+                            document.getElementById('specimenOther').value = data.specimenOther || '';
+                        } else {
+                            document.getElementById('specimenOther').disabled = true;
+                            document.getElementById('specimenOther').value = '';
+                        }
+                    }
+                }
+
                 if(document.getElementById('diagnosis')) document.getElementById('diagnosis').value = data.diagnosis || '';
 
                 document.querySelectorAll('input[name="symptoms"]').forEach(cb => {
@@ -938,10 +1384,18 @@
             // ปิดและล้างค่า subward
             document.getElementById('subWardContainer').classList.add('hidden');
             document.getElementById('subWardGrid').innerHTML = '';
+
+            // ล้างค่า specimenOther
+            document.getElementById('specimenOther').disabled = true;
+            document.getElementById('specimenOther').value = '';
             
+            // เซ็ตวันที่และเวลาปัจจุบันกลับไปใหม่
             const today = new Date();
             if(document.getElementById('recordDate')) {
                 document.getElementById('recordDate').value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+            }
+            if(document.getElementById('recordTime')) {
+                document.getElementById('recordTime').value = `${String(today.getHours()).padStart(2,'0')}:${String(today.getMinutes()).padStart(2,'0')}`;
             }
 
             submitText.innerText = "บันทึกข้อมูลเข้าระบบ";
@@ -993,11 +1447,15 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            // ตั้งวันที่ครั้งแรก
+            // ตั้งวันที่และเวลาครั้งแรก
             const today = new Date();
             const recordDateInput = document.getElementById('recordDate');
             if(recordDateInput) {
                 recordDateInput.value = `${today.getFullYear()}-${String(today.getMonth()+1).padStart(2,'0')}-${String(today.getDate()).padStart(2,'0')}`;
+            }
+            const recordTimeInput = document.getElementById('recordTime');
+            if(recordTimeInput) {
+                recordTimeInput.value = `${String(today.getHours()).padStart(2,'0')}:${String(today.getMinutes()).padStart(2,'0')}`;
             }
 
             // ระบบเติมจุดทศนิยมอัตโนมัติสำหรับอุณหภูมิ
