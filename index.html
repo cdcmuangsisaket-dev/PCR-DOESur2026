@@ -47,18 +47,14 @@
             /* ซ่อนส่วนที่ไม่อยากให้พิมพ์เลยเสมอ */
             .no-print { display: none !important; }
             
-            /* --- โหมดพิมพ์ใบส่งตรวจ 2 หน้า (Report Mode) --- */
-            body.print-report #appContainer { display: none !important; }
-            body.print-report #printSummaryArea { display: block !important; }
-            body.print-report #printableArea { display: block !important; }
-            
-            /* แบ่งหน้ากระดาษ */
-            .page-break { page-break-after: always; break-after: page; }
+            /* --- โหมดพิมพ์ใบส่งตรวจ 1 หน้ารวม (Report Mode) --- */
+            body.print-mode #appContainer { display: none !important; }
+            body.print-mode #printableArea { display: block !important; }
             
             #printableArea {
-                font-size: 13pt; /* ปรับขนาดฟอนต์ให้พอดีกระดาษ */
+                font-size: 11pt !important; /* ปรับขนาดฟอนต์ให้พอดีกระดาษ 1 หน้า */
                 color: #000;
-                line-height: 1.4;
+                line-height: 1.5;
             }
         }
     </style>
@@ -364,110 +360,35 @@
 
     </div>
 
-    <!-- หน้าพิมพ์ 1: ฟอร์มสรุปข้อมูล (แบบจำลองเอกสาร) -->
-    <div id="printSummaryArea" class="hidden bg-white text-black p-8 w-full max-w-4xl mx-auto page-break">
-        
+    <!-- หน้าพิมพ์: ใบส่งตรวจ สคร.10 -->
+    <div id="printableArea" class="hidden bg-white text-black py-4 px-6 w-full max-w-4xl mx-auto">
         <!-- Header -->
-        <div class="text-center mb-6">
-            <h2 class="text-[15pt] font-bold mb-1">PCR DOESur 2026 SSKH</h2>
-            <h3 class="text-[13pt] font-bold">แบบสอบการเฝ้าระวังผู้ป่วยทางเดินหายใจรุนแรง โรงพยาบาลศรีสะเกษ</h3>
-        </div>
-
-        <!-- Section 1 -->
-        <div class="mb-5 space-y-3 text-[12pt]">
-            <h3 class="font-bold text-[13pt]">1. ข้อมูลทั่วไปของผู้ป่วย (General information)</h3>
+        <div class="flex justify-between items-start mb-4 text-[10pt] font-bold">
             <div class="flex items-end">
-                <span>วันที่เก็บตัวอย่าง :</span>
-                <span id="sumRecordDate" class="border-b border-dotted border-black ml-2 px-2 text-center" style="width: 120px;"></span>
-                <span class="ml-4">เวลาที่เก็บ :</span>
-                <span id="sumRecordTime" class="border-b border-dotted border-black ml-2 px-2 text-center" style="width: 80px;"></span>
-                <span class="ml-4">รหัส HN :</span>
-                <span id="sumHn" class="flex-1 border-b border-dotted border-black ml-2 px-2 text-center font-bold"></span>
+                ตึกที่ส่งตรวจ: <span id="printWardName" class="border-b border-black ml-2 px-4 text-center text-[12pt] min-w-[150px]"></span>
             </div>
-            <div class="flex items-end">
-                <span>เลขบัตร ปชช./Passport No :</span>
-                <span id="sumIdCard" class="w-1/2 border-b border-dotted border-black ml-2 px-2 text-center"></span>
-            </div>
-            <div class="flex items-end">
-                <span>ชื่อ – นามสกุล :</span>
-                <span id="sumFullName" class="flex-1 border-b border-dotted border-black ml-2 px-2"></span>
-            </div>
-            <div class="flex items-end">
-                <span>เพศ :</span>
-                <span id="sumGender" class="border-b border-dotted border-black ml-2 px-2 text-center" style="width: 80px;"></span>
-                <span class="ml-4">อายุ :</span>
-                <span id="sumAge" class="border-b border-dotted border-black ml-2 px-2 text-center" style="width: 120px;"></span>
-            </div>
-        </div>
-
-        <!-- Section 2 -->
-        <div class="mb-5 space-y-3 text-[12pt] mt-6">
-            <h3 class="font-bold text-[13pt]">2. อาการทางคลินิก (Clinical Signs)</h3>
-            <div class="flex items-end">
-                <span>วันที่เริ่มป่วย :</span>
-                <span id="sumOnsetDate" class="border-b border-dotted border-black ml-2 px-2 text-center" style="width: 120px;"></span>
-                <span class="ml-4">ป่วยมาแล้ว :</span>
-                <span id="sumSickDays" class="border-b border-dotted border-black ml-2 px-2 text-center" style="width: 60px;"></span>
-                <span class="ml-2">วัน</span>
-                <span class="ml-4">อุณหภูมิสูงสุด :</span>
-                <span id="sumMaxTemp" class="flex-1 border-b border-dotted border-black ml-2 px-2 text-center"></span>
-                <span class="ml-2">(°C)</span>
-            </div>
-            <div class="flex items-end">
-                <span>อาการ :</span>
-                <span id="sumSymptomsText" class="flex-1 border-b border-dotted border-black ml-2 px-2"></span>
-            </div>
-        </div>
-
-        <!-- Section 3 -->
-        <div class="mb-5 space-y-3 text-[12pt] mt-6">
-            <h3 class="font-bold text-[13pt]">3. สิ่งส่งตรวจ และ การรักษา</h3>
-            <div class="flex items-end">
-                <span>ชนิดสิ่งส่งตรวจ :</span>
-                <span id="sumSpecimen" class="flex-1 border-b border-dotted border-black ml-2 px-2"></span>
-            </div>
-            <div class="flex items-end">
-                <span>รักษาที่ตึก :</span>
-                <span id="sumWard" class="flex-1 border-b border-dotted border-black ml-2 px-2"></span>
-            </div>
-            <div class="flex items-end">
-                <span>การวินิจฉัยโรคเบื้องต้น (Diagnosis) :</span>
-                <span id="sumDiagnosis" class="flex-1 border-b border-dotted border-black ml-2 px-2"></span>
-            </div>
-        </div>
-    </div>
-
-    <!-- หน้าพิมพ์ 2: ใบส่งตรวจ สคร.10 -->
-    <div id="printableArea" class="hidden bg-white text-black p-4 pb-4 w-full max-w-4xl mx-auto">
-        <!-- หัวกระดาษ: ตึกมุมซ้ายบน และ รหัสกำกับเอกสาร มุมขวาบน -->
-        <div class="flex justify-between items-start text-[11px] font-bold mb-3">
-            <div>
-                ตึกที่ส่งตรวจ: <span id="printWardName" class="border-b border-dotted border-black px-2 min-w-[120px] inline-block text-center text-sm"></span>
-            </div>
-            <div class="text-right">
+            <div class="text-right leading-tight">
                 F-VB/EID-013<br>Rev.01 28/11/2566
             </div>
         </div>
         
-        <!-- หัวเอกสาร -->
         <div class="text-center mb-6">
-            <h1 class="text-xl font-bold mb-1">โครงการ PCR-DOESur2026</h1>
-            <h2 class="text-[15px] font-bold mb-1">แบบขอส่งตรวจทางห้องปฏิบัติการโรคอุบัติใหม่อุบัติซ้ำ และโรคติดต่อนำโดยแมลง</h2>
-            <h3 class="text-[15px] font-bold">กลุ่มห้องปฏิบัติการฯ สคร.10 จ.อุบลฯ</h3>
+            <h1 class="text-[18pt] font-bold mb-2">โครงการ PCR-DOESur2026</h1>
+            <h2 class="text-[12pt] font-bold mb-1">แบบขอส่งตรวจทางห้องปฏิบัติการโรคอุบัติใหม่อุบัติซ้ำ และโรคติดต่อนำโดยแมลง</h2>
+            <h3 class="text-[12pt] font-bold">กลุ่มห้องปฏิบัติการฯ สคร.10 จ.อุบลฯ</h3>
         </div>
 
-        <!-- ข้อมูลหน่วยงานส่งตรวจ -->
-        <div class="grid grid-cols-2 gap-y-2 mb-4 text-[13px]">
+        <div class="grid grid-cols-2 gap-y-2 mb-3 text-[11pt]">
             <div><span class="font-bold">หน่วยงานที่ส่งตรวจ:</span> โรงพยาบาลศรีสะเกษ</div>
             <div><span class="font-bold">ชื่อผู้ส่งตรวจ:</span> นวรัตน์ บุญกัณหา</div>
             <div><span class="font-bold">เบอร์โทรศัพท์/โทรสาร:</span> 045611503 ต่อ 3013</div>
             <div><span class="font-bold">Email address:</span> nawa999@gmail.com</div>
         </div>
 
-        <div class="border-b-2 border-black my-4"></div>
+        <div class="border-b-[3px] border-black mb-4"></div>
 
-        <!-- ข้อมูลผู้ป่วย (จำลองโครงสร้างเดิม) -->
-        <div class="grid grid-cols-2 gap-y-3 mb-4 text-[13px] items-end">
+        <!-- Patient Info -->
+        <div class="grid grid-cols-2 gap-y-3 mb-4 text-[11pt] items-end">
             <div class="col-span-2">
                 <span class="font-bold">ชื่อ-สกุล:</span> <span id="printName" class="ml-2 border-b border-dotted border-black px-2 min-w-[250px] inline-block"></span>
             </div>
@@ -485,19 +406,56 @@
             </div>
             <div class="col-span-2 flex items-center">
                 <span class="font-bold">HN:</span> 
-                <span id="printHn" class="ml-2 border-b border-dotted border-black px-2 min-w-[150px] inline-block text-center text-[15px] font-bold"></span>
+                <span id="printHn" class="ml-2 border-b border-dotted border-black px-2 min-w-[150px] inline-block text-center text-[13pt] font-bold"></span>
                 <!-- จุดแสดงบาร์โค้ด HN -->
                 <svg id="printBarcode" class="ml-4 h-8"></svg>
             </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-y-3 mb-5 text-[13px]">
+        <!-- อาการทางคลินิก และ การวินิจฉัยโรค -->
+        <div class="mb-5 mt-2 text-[11pt]">
+            <div class="font-bold mb-2"></div>
+            <div class="grid grid-cols-1 gap-y-3">
+                <div class="flex items-end">
+                    <span class="font-bold">วันที่เริ่มป่วย:</span> <span id="printOnsetDate" class="ml-2 border-b border-dotted border-black px-2 min-w-[100px] inline-block text-center"></span>
+                    <span class="font-bold ml-4">ป่วยมาแล้ว:</span> <span id="printSickDays" class="ml-2 border-b border-dotted border-black px-2 min-w-[60px] inline-block text-center"></span> <span class="ml-1">วัน</span>
+                    <span class="font-bold ml-4">อุณหภูมิสูงสุด:</span> <span id="printMaxTemp" class="ml-2 border-b border-dotted border-black px-2 min-w-[60px] inline-block text-center"></span> <span class="ml-1">°C</span>
+                </div>
+                <div class="flex items-end">
+                    <span class="font-bold">อาการ:</span> <span id="printSymptomsText" class="ml-2 border-b border-dotted border-black px-2 flex-1 inline-block"></span>
+                </div>
+                <div class="flex items-end">
+                    <span class="font-bold">การวินิจฉัยโรคเบื้องต้น (Diagnosis):</span> <span id="printDiagnosis" class="ml-2 border-b border-dotted border-black px-2 flex-1 inline-block"></span>
+                </div>
+            </div>
+        </div>
+
+        <!-- วันที่เก็บสิ่งส่งตรวจ -->
+        <div class="grid grid-cols-2 gap-y-3 mb-4 text-[11pt]">
             <div>
                 <span class="font-bold">วันที่เก็บสิ่งส่งตรวจ:</span> <span id="printCollectDate" class="ml-2 border-b border-dotted border-black px-2 min-w-[100px] inline-block text-center"></span>
             </div>
             <div>
                 <span class="font-bold">เวลา:</span> <span id="printCollectTime" class="ml-2 border-b border-dotted border-black px-2 min-w-[80px] inline-block text-center"></span> น.
             </div>
+        </div>
+
+        <!-- Specimen -->
+        <div class="mb-5 text-[11pt] flex items-center">
+            <span class="font-bold mr-4">ชนิดสิ่งส่งตรวจ:</span> 
+            <span id="printSpecimenResult"></span>
+        </div>
+
+        <div class="border-b-[3px] border-black mb-4"></div>
+
+        <!-- Test List -->
+        <h3 class="font-bold text-[12pt] mb-3">รายการตรวจ</h3>
+        <div class="mb-4">
+            <div class="flex gap-1 mb-1 font-bold text-[12pt]"><span>( ✓ )</span> <span>อื่นๆ ระบุ.. PCR Respiratory Pathogen 23</span></div>
+        </div>
+
+        <!-- วันที่ส่งสิ่งส่งตรวจ -->
+        <div class="grid grid-cols-2 gap-y-3 mt-8 mb-4 text-[11pt]">
             <div>
                 <span class="font-bold">วันที่ส่งสิ่งส่งตรวจ:</span> <span id="printSendDate" class="ml-2 border-b border-dotted border-black px-2 min-w-[100px] inline-block text-center"></span>
             </div>
@@ -506,55 +464,8 @@
             </div>
         </div>
 
-        <!-- ชนิดสิ่งส่งตรวจ (แสดงเฉพาะอันที่เลือก) -->
-        <div class="mb-5 text-[13px] flex items-center">
-            <span class="font-bold mr-4">ชนิดสิ่งส่งตรวจ:</span> 
-            <span id="printSpecimenResult"></span>
-        </div>
-
-        <div class="border-b-2 border-black my-4"></div>
-
-        <!-- รายการตรวจ 2 คอลัมน์ (ตามใบต้นฉบับ) -->
-        <h3 class="font-bold text-[14px] mb-3">รายการตรวจ</h3>
-        <div class="grid grid-cols-2 gap-x-6 gap-y-2.5 text-[11px] mb-6">
-            <!-- ฝั่งซ้าย -->
-            <div>
-                <div class="mb-2">( ) สารพันธุกรรมเชื้อ SARS-COV-2 (COVID-19) 3 genes</div>
-                <div class="mb-2">( ) Anti-SARS-CoV-2 (total Antibody; IgG/IgM)</div>
-                <div class="mb-2">( ) สารพันธุกรรมเชื้อ SARS-CoV-2 (2 genes)-FluA-FluB</div>
-                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Influenza A/B, pandemic 2009 H1N1</div>
-                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Influenza A/B & RSV nucleic acid test</div>
-                <div class="mb-2">( ) Respiratory panel 1 (influenza A/B, RSV A/B, FluA-H1, FluA-H1pdm09, FluA-H3)</div>
-                <div class="mb-2">( ) Respiratory panel 2 (Adenovirus, Enterovirus, Parainfluenza virus 1,2,3,4, Metapneumovirus)</div>
-                <div class="mb-2">( ) Respiratory panel 3 (Bocavirus, Rhinovirus, Coronavirus NL63, Coronavirus 229E, Coronavirus OC43)</div>
-                <div class="mb-2">( ) Respiratory panel 4 (M.pneumoniae, C.pneumoniae, L.pneumophila, H.influenzae, S.pneumoniae, B.pertussis, B.parapertussis)</div>
-                <div class="mb-2">( ) RP 26 (Respiratory panel 1-4)</div>
-                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Dengue virus (แยก 4 serotypes)</div>
-                <div class="mb-2">( ) Dengue Ab (IgG/IgM)</div>
-                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Zika+Dengue+Chikungunya</div>
-            </div>
-            <!-- ฝั่งขวา -->
-            <div>
-                <div class="mb-2">( ) สารพันธุกรรมเชื้อ CT/NG (หนองในเทียม/หนองใน)</div>
-                <div class="mb-2">( ) qualitative HIV RNA</div>
-                <div class="mb-2">( ) HIV-Viral load (HIV-VL)</div>
-                <div class="mb-2">( ) Anti-HCV</div>
-                <div class="mb-2">( ) HCV genotype</div>
-                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Malaria (แยก 5 species)</div>
-                <div class="mb-2">( ) NS1 Ag (Dengue)</div>
-                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Chikungunya virus</div>
-                <div class="mb-2">( ) สารพันธุกรรมเชื้อ Zika virus</div>
-                <div class="mb-2">( ) GC culture & DST</div>
-                <div class="mb-2">( ) CD4</div>
-                <div class="mb-2">( ) HIV-drug resistance Deep sequencing (Next generation system)</div>
-                <div class="mb-2">( ) HCV-Viral load (HCV-VL)</div>
-                <!-- รายการที่มีการติ๊กไว้แล้ว -->
-                <div class="font-bold text-[12px]">( ✓ ) อื่นๆ ระบุ.. PCR Respiratory Pathogen 23</div>
-            </div>
-        </div>
-
-        <!-- หมายเหตุล่างฟอร์ม -->
-        <div class="text-[11px] leading-relaxed border-t border-slate-300 pt-4 mt-6">
+        <!-- Footer Info -->
+        <div class="border-t border-slate-300 mt-2 pt-2 text-[8pt] leading-relaxed">
             <span class="font-bold">หมายเหตุ:</span> กรุณากรอกข้อมูลให้ครบถ้วน หากมีข้อสงสัย/ซักถาม สามารถติดต่อเจ้าหน้าที่ได้ที่เบอร์ 045-243127, 045-255836, 096-1892273, 083-0883871, 0935539119, email address: labaids_dpc10@yahoo.com, labtb_dpc10@yahoo.com<br>
             <span class="font-bold mt-1 inline-block">: กรณีโรคระบาด / โรคอุบัติใหม่ / โรคอุบัติซ้ำ กรุณาแนบข้อมูลการสอบสวนโรคด้วยทุกครั้ง หากไม่มีแบบสอบสวนโรค จะมีการเรียกเก็บค่าตรวจ</span>
         </div>
@@ -848,8 +759,8 @@
                         <td class="py-3 px-4 truncate max-w-[150px]" title="${row.diagnosis || ''}">${row.diagnosis || '-'}</td>
                         <td class="py-3 px-4 text-center">
                             <div class="flex items-center justify-center gap-2">
-                                <!-- ปุ่มพิมพ์ใบรายงาน 2 หน้า -->
-                                <button onclick="window.printDocument('${row.id}')" class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="พิมพ์แบบฟอร์มและใบส่งตรวจ">
+                                <!-- ปุ่มพิมพ์ใบรายงานหน้าเดียว -->
+                                <button onclick="window.printDocument('${row.id}')" class="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 rounded-lg transition-colors" title="พิมพ์ใบส่งตรวจ">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                                 </button>
                                 <!-- ปุ่มแก้ไข -->
@@ -871,13 +782,11 @@
         // จับเหตุการณ์เมื่อเปลี่ยนสัปดาห์ใน Dropdown
         weekFilter.addEventListener('change', window.renderTable);
 
-        // --- ระบบพิมพ์ใบ 2 หน้า (หน้าฟอร์มสรุป + หน้า สคร.10) ---
+        // --- ระบบพิมพ์ใบส่งตรวจแบบหน้าเดียว ---
         window.printDocument = function(id) {
             const record = pcrData.find(r => r.id === id);
             if (!record) return;
 
-            // --- เตรียมข้อมูลสำหรับ "หน้าพิมพ์ 1: ฟอร์มสรุปข้อมูล" ---
-            
             // จัดรูปแบบวันที่ต่างๆ ให้อ่านง่าย
             let collectDateFormatted = '-';
             if (record.recordDate) {
@@ -897,59 +806,50 @@
                 const oDate = new Date(record.onsetDate);
                 const diffTime = rDate - oDate;
                 if (diffTime >= 0) {
-                    sickDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    sickDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
                 } else {
                     sickDays = 0;
                 }
             }
 
-            document.getElementById('sumRecordDate').innerText = collectDateFormatted;
-            document.getElementById('sumRecordTime').innerText = record.recordTime ? record.recordTime + ' น.' : '-';
-            document.getElementById('sumHn').innerText = record.hn || '-';
-            document.getElementById('sumIdCard').innerText = record.idCard || '-';
-            document.getElementById('sumFullName').innerText = record.name || '-';
-            document.getElementById('sumGender').innerText = record.gender || '-';
+            // เตรียมข้อมูลลงในฟอร์ม
+            document.getElementById('printName').innerText = record.name || '';
+            document.getElementById('printGender').innerText = record.gender || '';
             
             // รวม ปี และ เดือน
             let ageStr = '';
             if (record.ageYear) ageStr += `${record.ageYear} ปี `;
             if (record.ageMonth) ageStr += `${record.ageMonth} เดือน`;
             if (!ageStr && record.age) ageStr = `${record.age} ปี`; // รองรับข้อมูลเก่า
-            document.getElementById('sumAge').innerText = ageStr.trim() || '-';
-            
-            document.getElementById('sumOnsetDate').innerText = onsetDateFormatted;
-            document.getElementById('sumSickDays').innerText = sickDays;
-            document.getElementById('sumMaxTemp').innerText = record.maxTemp || '-';
-            
-            const wardName = record.subWard ? `${record.ward} (${record.subWard})` : (record.ward || '-');
-            document.getElementById('sumWard').innerText = wardName;
-            document.getElementById('sumDiagnosis').innerText = record.diagnosis || '-';
-            
-            const specText = record.specimen === 'อื่นๆ' ? `อื่นๆ ระบุ: ${record.specimenOther || '-'}` : (record.specimen || '-');
-            document.getElementById('sumSpecimen').innerText = specText;
-
-            // แสดงอาการ เป็น Text เรียงต่อกัน
-            document.getElementById('sumSymptomsText').innerText = record.symptoms && record.symptoms.length > 0 ? record.symptoms.join(', ') : '-';
-
-
-            // --- เตรียมข้อมูลสำหรับ "หน้าพิมพ์ 2: ใบส่งตรวจ สคร.10" ---
-            
-            document.getElementById('printName').innerText = record.name || '';
-            document.getElementById('printGender').innerText = record.gender || '';
             document.getElementById('printAge').innerText = ageStr.trim() || '';
+            
             document.getElementById('printHn').innerText = record.hn || '';
             document.getElementById('printIdCard').innerText = record.idCard || '';
+            
+            const wardName = record.subWard ? `${record.ward} (${record.subWard})` : (record.ward || '');
             document.getElementById('printWardName').innerText = wardName;
             
+            // สร้างบาร์โค้ด HN ถ้าระบุ HN ไว้
             if (record.hn) {
-                JsBarcode("#printBarcode", record.hn, {
-                    format: "CODE128", displayValue: false, height: 25, width: 1.5, margin: 0
-                });
-                document.getElementById('printBarcode').style.display = 'block';
+                try {
+                    // CODE128 รองรับตัวอักษรและตัวเลข แต่ถ้าระบุภาษาไทยจะเกิด Error และข้ามไป
+                    JsBarcode("#printBarcode", record.hn, {
+                        format: "CODE128", 
+                        displayValue: false, 
+                        height: 25, 
+                        width: 1.5, 
+                        margin: 0
+                    });
+                    document.getElementById('printBarcode').style.display = 'block';
+                } catch (error) {
+                    console.warn("ไม่สามารถสร้างบาร์โค้ดได้ (อาจมีตัวอักษรภาษาไทย):", error);
+                    document.getElementById('printBarcode').style.display = 'none';
+                }
             } else {
                 document.getElementById('printBarcode').style.display = 'none';
             }
             
+            // ติ๊กชนิดสิ่งส่งตรวจ (แสดงเฉพาะอันที่เลือก)
             const specResultEl = document.getElementById('printSpecimenResult');
             if (specResultEl) {
                 if (record.specimen === 'อื่นๆ') {
@@ -964,23 +864,40 @@
             document.getElementById('printCollectDate').innerText = collectDateFormatted === '-' ? '' : collectDateFormatted;
             document.getElementById('printCollectTime').innerText = record.recordTime || '-';
 
+            // วันที่และเวลาส่งตัวอย่าง (ใช้วันเวลาปัจจุบันที่กดปริ้นแบบอัตโนมัติ)
             const now = new Date();
             const sendDay = String(now.getDate()).padStart(2, '0');
             const sendMonth = String(now.getMonth() + 1).padStart(2, '0');
             const sendThaiYear = now.getFullYear() + 543;
-            document.getElementById('printSendDate').innerText = `${sendDay}/${sendMonth}/${sendThaiYear}`;
-            document.getElementById('printSendTime').innerText = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+            const sendDateFormatted = `${sendDay}/${sendMonth}/${sendThaiYear}`;
+            
+            const sendHours = String(now.getHours()).padStart(2, '0');
+            const sendMinutes = String(now.getMinutes()).padStart(2, '0');
+            const sendTimeFormatted = `${sendHours}:${sendMinutes}`;
 
-            // สั่งพิมพ์ (เปิดคลาสที่ใช้โชว์ 2 หน้ากระดาษ)
-            document.body.classList.add('print-report');
+            document.getElementById('printSendDate').innerText = sendDateFormatted;
+            document.getElementById('printSendTime').innerText = sendTimeFormatted;
+
+            // ข้อมูลอาการทางคลินิกและการวินิจฉัย
+            document.getElementById('printOnsetDate').innerText = onsetDateFormatted === '-' ? '' : onsetDateFormatted;
+            document.getElementById('printSickDays').innerText = sickDays === '-' ? '' : sickDays;
+            document.getElementById('printMaxTemp').innerText = record.maxTemp || '';
+            document.getElementById('printSymptomsText').innerText = record.symptoms && record.symptoms.length > 0 ? record.symptoms.join(', ') : '';
+            document.getElementById('printDiagnosis').innerText = record.diagnosis || '';
+
+            // สลับแสดงผลเพื่อสั่งพิมพ์
+            document.getElementById('appContainer').classList.add('hidden');
+            document.getElementById('printableArea').classList.remove('hidden');
+            
             setTimeout(() => {
                 window.print();
-            }, 100);
+            }, 200); // รอเบราว์เซอร์เตรียมหน้ากระดาษ
         }
 
-        // ล้างคลาสหลังพิมพ์เสร็จ เพื่อให้หน้าเว็บกลับมาปกติ
+        // เมื่อปิดหน้าต่าง Print ให้กลับมาหน้าเว็บปกติ
         window.onafterprint = function() {
-            document.body.classList.remove('print-report');
+            document.getElementById('appContainer').classList.remove('hidden');
+            document.getElementById('printableArea').classList.add('hidden');
         };
 
         // --- ระบบเปิดปิดช่องกรอก อื่นๆ ระบุ (สิ่งส่งตรวจ) ---
@@ -1244,7 +1161,7 @@
                 errorMsg.innerText = `* HN นี้ถูกบันทึกไปแล้ว (ระบบป้องกันการลงข้อมูลซ้ำ)`;
                 
                 hnGroup.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                return; // หยุดการบันทึก
+                return; // หยุดการบันึก
             }
 
             // อ่านค่าตึกย่อย ถ้ามีการแสดงผลอยู่และถูกเลือก
