@@ -2216,7 +2216,7 @@
             });
 
             // ------------------------------------------------------------
-            // ระบบ AI & ขุดข้อมูล ช่วยอ่านผลแลป (OCR + PDF Parsing) แบบอ่านผลเฉพาะเครื่อง (ไม่เปลือง Storage)
+            // ระบบ AI & ขุดข้อมูล ช่วยอ่านผลแลป (OCR + PDF Parsing V.3 - Proximity Search)
             // ------------------------------------------------------------
             document.getElementById('labFileUpload').addEventListener('change', async function(e) {
                 const file = e.target.files[0];
@@ -2253,48 +2253,52 @@
                         for (let i = 1; i <= pdf.numPages; i++) {
                             const page = await pdf.getPage(i);
                             const textContent = await page.getTextContent();
-                            
-                            // จัดเรียงข้อความตามแกน Y และ X เพื่อให้ออกมาเป็นบรรทัดที่ถูกต้อง
-                            const items = textContent.items;
-                            items.sort((a, b) => {
-                                if (Math.abs(b.transform[5] - a.transform[5]) > 5) {
-                                    return b.transform[5] - a.transform[5]; // Y desc
-                                }
-                                return a.transform[4] - b.transform[4]; // X asc
-                            });
+                            // ดึงข้อความมาต่อกันตรงๆ โดยไม่ต้องพยายามเรียงบรรทัด (ป้องกันตารางเพี้ยน)
+                            const pageText = textContent.items.map(item => item.str).join(' ');
+                            extractedText += pageText + ' ';
+                        }
 
-                            let lastY = -1;
-                            for (const item of items) {
-                                if (lastY !== -1 && Math.abs(item.transform[5] - lastY) > 5) {
-                                    extractedText += '\n'; // ขึ้นบรรทัดใหม่เมื่อค่า Y เปลี่ยน
-                                }
-                                extractedText += item.str + ' ';
-                                lastY = item.transform[5];
-                            }
-                            extractedText += '\n';
+                        // ถ้าดึงข้อความออกมาได้น้อยมาก แสดงว่าเป็น PDF แบบสแกนรูปภาพ
+                        if (extractedText.trim().length < 50) {
+                            throw new Error("SCANNED_PDF");
                         }
                     } else {
                         const result = await Tesseract.recognize(file, 'eng');
                         extractedText = result.data.text;
                     }
 
-                    // แยกข้อความเป็นบรรทัด เพื่อวิเคราะห์ทีละบรรทัด
-                    const lines = extractedText.toLowerCase().split('\n');
+                    // ปรับแต่งข้อความให้วิเคราะห์ง่ายขึ้น
+                    let text = extractedText.toLowerCase().replace(/\s+/g, ' ');
                     let isDetected = false;
                     let pathogenFound = "";
-                    let hasNegative = false;
+                    
+                    // 1. นำคำปฏิเสธออกไปให้หมดก่อน ป้องกันการสับสน
+                    let safeText = text.replace(/not\s*detected/g, '[[neg]]')
+                                       .replace(/non[-\s]*detected/g, '[[neg]]')
+                                       .replace(/undetected/g, '[[neg]]')
+                                       .replace(/negative/g, '[[neg]]')
+                                       .replace(/not\s*reactive/g, '[[neg]]')
+                                       .replace(/non[-\s]*reactive/g, '[[neg]]');
+
+                    let hasNegative = safeText.includes('[[neg]]');
 
                     const pathogenMap = {
                         "sars-cov-2": "SARS-CoV-2",
+                        "covid-19": "SARS-CoV-2",
+                        "covid 19": "SARS-CoV-2",
                         "covid": "SARS-CoV-2",
                         "h1n1": "Influenza A H1N1 pdm09",
                         "h3": "Influenza A H3",
-                        "flu a": "Influenza A",
                         "influenza a": "Influenza A",
-                        "flu b": "Influenza B",
+                        "flu a": "Influenza A",
+                        "inf a": "Influenza A",
                         "influenza b": "Influenza B",
-                        "rsv": "Respiratory Syncytial Virus A+B",
+                        "flu b": "Influenza B",
+                        "inf b": "Influenza B",
+                        "respiratory syncytial virus a+b": "Respiratory Syncytial Virus A+B",
+                        "respiratory syncytial virus": "Respiratory Syncytial Virus A+B",
                         "syncytial": "Respiratory Syncytial Virus A+B",
+                        "rsv": "Respiratory Syncytial Virus A+B",
                         "parainfluenza virus 1": "Parainfluenza virus 1",
                         "parainfluenza 1": "Parainfluenza virus 1",
                         "parainfluenza virus 2": "Parainfluenza virus 2",
@@ -2309,61 +2313,78 @@
                         "nl63": "Coronavirus NL63",
                         "oc43": "Coronavirus OC43",
                         "229e": "Coronavirus 229E",
+                        "metapneumovirus a+b": "Human Metapneumovirus A+B",
                         "metapneumovirus": "Human Metapneumovirus A+B",
+                        "rhinovirus/enterovirus": "Rhinovirus/Enterovirus",
                         "rhinovirus": "Rhinovirus/Enterovirus",
                         "enterovirus": "Rhinovirus/Enterovirus",
+                        "bordetella pertussis": "Bordetella pertussis",
                         "bordetella": "Bordetella pertussis",
+                        "chlamydophila pneumoniae": "Chlamydophila pneumoniae",
                         "chlamydophila": "Chlamydophila pneumoniae",
+                        "legionella pneumophilia": "Legionella pneumophilia",
                         "legionella": "Legionella pneumophilia",
+                        "mycoplasma pneumoniae": "Mycoplasma pneumoniae",
                         "mycoplasma": "Mycoplasma pneumoniae"
                     };
 
-                    const sortedKeys = Object.keys(pathogenMap).sort((a, b) => b.length - a.length);
+                    // 2. หาคำว่า Detected, Positive, Reactive ที่เหลือรอดจากการกรอง
+                    const posRegex = /(detected|positive|reactive)/g;
+                    let match;
+                    let positiveIndices = [];
+                    while ((match = posRegex.exec(safeText)) !== null) {
+                        positiveIndices.push(match.index);
+                    }
 
-                    // กวาดสายตาอ่านทีละบรรทัด
-                    for (let i = 0; i < lines.length; i++) {
-                        let line = lines[i];
+                    // 3. ค้นหาชื่อเชื้อที่ "อยู่ใกล้คำว่า Detected มากที่สุด"
+                    if (positiveIndices.length > 0) {
+                        isDetected = true;
                         
-                        // ตัดคำปฏิเสธในบรรทัดนั้นออก
-                        let processedLine = line.replace(/not\s*detected/g, '[[neg]]')
-                                                .replace(/non\s*detected/g, '[[neg]]')
-                                                .replace(/undetected/g, '[[neg]]')
-                                                .replace(/negative/g, '[[neg]]');
+                        let closestPathogen = "";
+                        let minDistance = Infinity;
 
-                        if (processedLine.includes('[[neg]]')) {
-                            hasNegative = true;
-                        }
-
-                        // ถ้าในบรรทัดยังมีคำว่า Detected แสดงว่าเชื้อในบรรทัดนี้คือผลบวก!
-                        if (/(?:detected|positive)/.test(processedLine)) {
-                            isDetected = true;
-                            
-                            // หาชื่อเชื้อในบรรทัดเดียวกัน
-                            for (const key of sortedKeys) {
-                                if (processedLine.includes(key)) {
-                                    pathogenFound = pathogenMap[key];
-                                    break;
+                        for (let posIdx of positiveIndices) {
+                            for (const key in pathogenMap) {
+                                let keyIdx = safeText.indexOf(key);
+                                while (keyIdx !== -1) {
+                                    // ระยะห่างจากจุดสิ้นสุดของชื่อเชื้อ ถึง จุดเริ่มต้นของคำว่า Detected
+                                    let distance = posIdx - (keyIdx + key.length);
+                                    
+                                    // ถ้าระยะห่างอยู่ระหว่าง 0 ถึง 150 ตัวอักษร (เชื้อต้องอยู่ก่อนผล)
+                                    if (distance >= 0 && distance < 150 && distance < minDistance) {
+                                        minDistance = distance;
+                                        closestPathogen = pathogenMap[key];
+                                    }
+                                    
+                                    // ค้นหาคำเดิมถัดไป
+                                    keyIdx = safeText.indexOf(key, keyIdx + 1);
                                 }
                             }
-                            
-                            // ถ้าบรรทัดที่บอกว่า Detected ไม่มีชื่อเชื้อ ให้ดูบรรทัดก่อนหน้าและถัดไป
-                            if (!pathogenFound) {
-                                const prevLine = i > 0 ? lines[i-1] : '';
-                                const nextLine = i < lines.length - 1 ? lines[i+1] : '';
-                                const contextText = prevLine + ' ' + nextLine;
-                                
-                                for (const key of sortedKeys) {
-                                    if (contextText.includes(key)) {
-                                        pathogenFound = pathogenMap[key];
-                                        break;
+                        }
+
+                        // เผื่อฟอร์แมตแปลกๆ ที่ชื่อเชื้ออยู่หลังผล
+                        if (!closestPathogen) {
+                            for (let posIdx of positiveIndices) {
+                                for (const key in pathogenMap) {
+                                    let keyIdx = safeText.indexOf(key);
+                                    while (keyIdx !== -1) {
+                                        let distance = Math.abs(posIdx - keyIdx);
+                                        if (distance < 150 && distance < minDistance) {
+                                            minDistance = distance;
+                                            closestPathogen = pathogenMap[key];
+                                        }
+                                        keyIdx = safeText.indexOf(key, keyIdx + 1);
                                     }
                                 }
                             }
-                            
-                            if (pathogenFound) break; // เจอเป้าหมายแล้ว หยุดค้นหา
+                        }
+
+                        if (closestPathogen) {
+                            pathogenFound = closestPathogen;
                         }
                     }
 
+                    // อัปเดต UI 
                     const rp23Select = document.getElementById('labRp23Select');
                     const pathSelect = document.getElementById('labRp23Pathogen');
                     const statusSelect = document.getElementById('labStatusSelect');
@@ -2399,7 +2420,11 @@
 
                 } catch (err) {
                     console.error(err);
-                    ocrStatus.innerHTML = '<span class="text-rose-500 text-[11px] font-medium">อ่านไฟล์ไม่สำเร็จ กรุณาระบุผลด้วยตนเอง</span>';
+                    if (err.message === "SCANNED_PDF") {
+                        ocrStatus.innerHTML = '<span class="text-rose-500 text-[11px] font-medium">⚠️ ไฟล์ PDF นี้เป็นรูปภาพสแกน ระบบไม่สามารถอ่านได้ กรุณาแปลงเป็นไฟล์ภาพ (JPG) หรือระบุผลด้วยตนเอง</span>';
+                    } else {
+                        ocrStatus.innerHTML = '<span class="text-rose-500 text-[11px] font-medium">อ่านไฟล์ไม่สำเร็จ กรุณาระบุผลด้วยตนเอง</span>';
+                    }
                 }
             });
 
