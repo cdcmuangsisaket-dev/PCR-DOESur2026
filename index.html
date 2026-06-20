@@ -729,8 +729,9 @@
         </div>
     </div>
 
-    <div id="labInfoModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity no-print">
-        <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-lg mx-auto transform transition-all scale-95 opacity-0 max-h-[90vh] overflow-y-auto" id="labInfoModalContent">
+    <!-- โหมดข้อมูล 123 (รวม Rapid Test) -->
+    <div id="labInfoModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 p-4 no-print">
+        <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-lg transform transition-all scale-95 opacity-0 max-h-[90vh] overflow-y-auto" id="labInfoModalContent">
             <h3 class="text-lg font-bold text-slate-800 mb-2 border-b border-slate-100 pb-3 flex items-center gap-2">
                 <span class="text-2xl">📝</span> ข้อมูลส่วนเสริมใบนำส่ง
             </h3>
@@ -739,6 +740,35 @@
                     <label class="block text-sm font-medium text-slate-700 mb-2">วันที่เข้ารับรักษา</label>
                     <input type="date" id="labAdmitDate" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-blue-200">
                 </div>
+                
+                <div class="sm:col-span-2 pt-4 border-t border-slate-100">
+                    <label class="block text-sm font-bold text-slate-700 mb-2">ผลการตรวจด้วย rapid test (ถ้ามีการตรวจ)</label>
+                    <div class="flex flex-col gap-3">
+                        <div class="flex flex-wrap gap-4 items-center">
+                            <label class="flex items-center gap-2 cursor-pointer">
+                                <input type="radio" name="labRapidResult" value="Negative" class="w-4 h-4 text-blue-600">
+                                <span class="text-sm font-medium text-slate-700">Negative</span>
+                            </label>
+                            <div class="flex items-center gap-2 flex-1 min-w-[200px]">
+                                <label class="flex items-center gap-2 cursor-pointer shrink-0">
+                                    <input type="radio" name="labRapidResult" value="Positive" class="w-4 h-4 text-blue-600">
+                                    <span class="text-sm font-medium text-slate-700">Positive โปรดระบุ</span>
+                                </label>
+                                <select id="labRapidText" class="flex-1 w-full px-3 py-1.5 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-blue-200 text-sm disabled:bg-slate-100 disabled:text-slate-400 cursor-pointer" disabled>
+                                    <option value="">-- เลือกผลตรวจ --</option>
+                                    <option value="Influenza A/B Ag">Influenza A/B Ag</option>
+                                    <option value="Rapid test ATK (Covid Ag)">Rapid test ATK (Covid Ag)</option>
+                                    <option value="Influenza A/B Ag + ATK (Covid Ag)">Influenza A/B Ag + ATK (Covid Ag)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="radio" name="labRapidResult" value="Not Done" class="w-4 h-4 text-slate-400" checked>
+                            <span class="text-xs text-slate-500">ไม่ได้ตรวจ / ยกเลิกการระบุ</span>
+                        </label>
+                    </div>
+                </div>
+
                 <div class="sm:col-span-2">
                     <label class="block text-sm font-medium text-slate-700 mb-2">ที่อยู่ผู้ป่วย (จังหวัดศรีสะเกษ)</label>
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
@@ -747,27 +777,6 @@
                         </select>
                         <select id="labAmphoe" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer">
                             <option value="">-- เลือกอำเภอ --</option>
-                            <option value="เมืองศรีสะเกษ">เมืองศรีสะเกษ</option>
-                            <option value="กันทรลักษ์">กันทรลักษ์</option>
-                            <option value="ขุขันธ์">ขุขันธ์</option>
-                            <option value="กันทรารมย์">กันทรารมย์</option>
-                            <option value="อุทุมพรพิสัย">อุทุมพรพิสัย</option>
-                            <option value="ราษีไศล">ราษีไศล</option>
-                            <option value="ขุนหาญ">ขุนหาญ</option>
-                            <option value="ปรางค์กู่">ปรางค์กู่</option>
-                            <option value="ไพรบึง">ไพรบึง</option>
-                            <option value="ยางชุมน้อย">ยางชุมน้อย</option>
-                            <option value="วังหิน">วังหิน</option>
-                            <option value="ภูสิงห์">ภูสิงห์</option>
-                            <option value="ศรีรัตนะ">ศรีรัตนะ</option>
-                            <option value="น้ำเกลี้ยง">น้ำเกลี้ยง</option>
-                            <option value="โนนคูณ">โนนคูณ</option>
-                            <option value="ห้วยทับทัน">ห้วยทับทัน</option>
-                            <option value="เบญจลักษ์">เบญจลักษ์</option>
-                            <option value="พยุห์">พยุห์</option>
-                            <option value="โพธิ์ศรีสุวรรณ">โพธิ์ศรีสุวรรณ</option>
-                            <option value="ศิลาลาด">ศิลาลาด</option>
-                            <option value="บึงบูรพ์">บึงบูรพ์</option>
                         </select>
                         <select id="labTambon" class="w-full px-3 py-2 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-blue-200 cursor-pointer disabled:bg-slate-100 disabled:text-slate-400" disabled>
                             <option value="">-- เลือกตำบล --</option>
@@ -786,6 +795,7 @@
         </div>
     </div>
 
+    <!-- โหมดลงผลแลป รพ. -->
     <div id="labResultModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity no-print">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-lg mx-auto transform transition-all scale-95 opacity-0 max-h-[90vh] overflow-y-auto" id="labResultModalContent">
             <h3 class="text-lg font-bold text-slate-800 mb-2 border-b border-slate-100 pb-3 flex items-center gap-2">
@@ -823,28 +833,7 @@
                         </label>
                     </div>
                 </div>
-                <div class="pt-4 border-t border-slate-100">
-                    <label class="block text-sm font-bold text-slate-700 mb-2">ผลการตรวจด้วย rapid test (ถ้ามีการตรวจ)</label>
-                    <div class="flex flex-col gap-3">
-                        <div class="flex flex-wrap gap-4 items-center">
-                            <label class="flex items-center gap-2 cursor-pointer">
-                                <input type="radio" name="labRapidResult" value="Negative" class="w-4 h-4 text-blue-600">
-                                <span class="text-sm font-medium text-slate-700">Negative</span>
-                            </label>
-                            <div class="flex items-center gap-2 flex-1 min-w-[200px]">
-                                <label class="flex items-center gap-2 cursor-pointer shrink-0">
-                                    <input type="radio" name="labRapidResult" value="Positive" class="w-4 h-4 text-blue-600">
-                                    <span class="text-sm font-medium text-slate-700">Positive โปรดระบุ</span>
-                                </label>
-                                <input type="text" id="labRapidText" class="flex-1 w-full px-3 py-1.5 rounded-lg border border-slate-300 outline-none focus:ring-2 focus:ring-blue-200 text-sm disabled:bg-slate-100 disabled:text-slate-400" disabled>
-                            </div>
-                        </div>
-                        <label class="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" name="labRapidResult" value="" class="w-4 h-4 text-slate-400" checked>
-                            <span class="text-xs text-slate-500">ไม่ได้ตรวจ / ยกเลิกการระบุ</span>
-                        </label>
-                    </div>
-                </div>
+                
                 <div class="pt-4 border-t border-slate-100">
                     <label class="block text-sm font-bold text-slate-700 mb-2">ผลการตรวจด้วย RP23</label>
                     <div class="flex flex-col gap-2">
@@ -910,7 +899,7 @@
         </div>
     </div>
 
-    <!-- Firebase Scripts (One Main Block) -->
+    <!-- Firebase Scripts -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
         import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
@@ -971,6 +960,18 @@
             "ศิลาลาด": ["กุง", "คลีกลิ้ง", "โจดม่วง", "หนองบัวดง"],
             "บึงบูรพ์": ["บึงบูรพ์", "เป๊าะ"]
         };
+
+        // Populate Amphoe
+        const amphoeSelect = document.getElementById('labAmphoe');
+        const defaultAmphoeOption = document.createElement('option');
+        defaultAmphoeOption.value = "";
+        defaultAmphoeOption.textContent = "-- เลือกอำเภอ --";
+        amphoeSelect.appendChild(defaultAmphoeOption);
+        Object.keys(sisaketTambons).forEach(amphoe => {
+            const opt = document.createElement('option');
+            opt.value = amphoe; opt.textContent = amphoe;
+            amphoeSelect.appendChild(opt);
+        });
 
         const initAuth = async () => {
             try {
@@ -1191,6 +1192,7 @@
                     else if (row.labResult === 'Positive') resultBadge = `<span class="bg-rose-100 text-rose-700 px-2.5 py-1 rounded-md text-xs font-bold">Positive</span>`;
                     else if (row.labResult === 'Reject') resultBadge = `<span class="bg-slate-800 text-slate-100 px-2.5 py-1 rounded-md text-xs font-bold">Reject</span>`;
                     else if (row.labResult === 'รับตัวอย่างแล้ว (รอผล)') resultBadge = `<span class="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-md text-xs font-medium">รอผลตรวจ</span>`;
+                    else if (row.labResult === 'ออกผลแล้ว') resultBadge = `<span class="bg-amber-100 text-amber-700 px-2.5 py-1 rounded-md text-xs font-medium">ออกผลแล้ว</span>`;
                     
                     const specText = row.specimen === 'อื่นๆ' ? row.specimenOther : row.specimen;
 
@@ -1209,7 +1211,7 @@
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                                 </button>
                                 <button onclick="window.requestAuth('labInfo', '${row.id}')" class="px-2 py-1 text-[10px] sm:text-xs font-medium bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded transition-colors border border-amber-200 hover:border-amber-600" title="แก้ไขข้อมูลใบนำส่ง 123">
-                                    📝 ข้อมูลที่อยู่
+                                    📝 ข้อมูล 123
                                 </button>
                                 <button onclick="window.requestAuth('labResult', '${row.id}')" class="px-2 py-1 text-[10px] sm:text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded transition-colors border border-blue-200 hover:border-blue-600" title="ลงผลสำหรับ รพ.">
                                     🔬 ลงผล (รพ.)
@@ -1437,6 +1439,28 @@
                     tambonSelect.innerHTML = '<option value="">-- เลือกตำบล --</option>';
                     tambonSelect.disabled = true;
                 }
+
+                // Rapid Test Logic
+                const rapidRadios = document.querySelectorAll('input[name="labRapidResult"]');
+                const rapidText = document.getElementById('labRapidText');
+                let foundRapid = false;
+                rapidRadios.forEach(radio => {
+                    if (radio.value === (record.rapidTestResult || '')) {
+                        radio.checked = true;
+                        foundRapid = true;
+                    }
+                });
+                if (!foundRapid) {
+                    const defaultRadio = document.querySelector('input[name="labRapidResult"][value="Not Done"]');
+                    if (defaultRadio) defaultRadio.checked = true;
+                }
+                
+                rapidText.value = record.rapidTestPositiveText || '';
+                if (record.rapidTestResult === 'Positive') {
+                    rapidText.disabled = false; rapidText.classList.remove('bg-slate-100', 'text-slate-400');
+                } else {
+                    rapidText.disabled = true; rapidText.classList.add('bg-slate-100', 'text-slate-400');
+                }
             }
             
             document.getElementById('labInfoModal').classList.remove('hidden');
@@ -1460,12 +1484,17 @@
             const originalText = btn.innerHTML;
             btn.innerHTML = "กำลังบันทึก...";
             btn.disabled = true;
+
+            const rapidTestResult = document.querySelector('input[name="labRapidResult"]:checked')?.value || "";
+            const rapidTestPositiveText = document.getElementById('labRapidText').value;
             
             const updateData = {
                 admitDate: document.getElementById('labAdmitDate').value,
                 addressTambon: document.getElementById('labTambon').value,
                 addressAmphoe: document.getElementById('labAmphoe').value,
-                addressProvince: document.getElementById('labProvince').value
+                addressProvince: document.getElementById('labProvince').value,
+                rapidTestResult: rapidTestResult,
+                rapidTestPositiveText: rapidTestPositiveText
             };
 
             try {
@@ -1503,24 +1532,6 @@
                     condText.disabled = false; condText.classList.remove('bg-slate-100', 'text-slate-400');
                 } else {
                     condText.disabled = true; condText.classList.add('bg-slate-100', 'text-slate-400');
-                }
-
-                const rapidRadios = document.querySelectorAll('input[name="labRapidResult"]');
-                const rapidText = document.getElementById('labRapidText');
-                let foundRapid = false;
-                rapidRadios.forEach(radio => {
-                    if (radio.value === (record.rapidTestResult || '')) {
-                        radio.checked = true;
-                        foundRapid = true;
-                    }
-                });
-                if (!foundRapid) document.querySelector('input[name="labRapidResult"][value=""]').checked = true;
-                
-                rapidText.value = record.rapidTestPositiveText || '';
-                if (record.rapidTestResult === 'Positive') {
-                    rapidText.disabled = false; rapidText.classList.remove('bg-slate-100', 'text-slate-400');
-                } else {
-                    rapidText.disabled = true; rapidText.classList.add('bg-slate-100', 'text-slate-400');
                 }
 
                 const rp23Select = document.getElementById('labRp23Select');
@@ -1582,16 +1593,12 @@
             btn.innerHTML = "กำลังบันทึก...";
             btn.disabled = true; 
             
-            const rapidTestResult = document.querySelector('input[name="labRapidResult"]:checked').value;
-            const rapidTestPositiveText = document.getElementById('labRapidText').value;
             const labCondResult = document.querySelector('input[name="labCondResult"]:checked').value;
 
             let updateData = {
                 labResult: document.getElementById('labStatusSelect').value,
                 labCondition: labCondResult,
                 labConditionText: document.getElementById('labCondText').value,
-                rapidTestResult: rapidTestResult,
-                rapidTestPositiveText: rapidTestPositiveText,
                 rp23Result: document.getElementById('labRp23Select').value,
                 rp23DetectedText: document.getElementById('labRp23Pathogen').value
             };
