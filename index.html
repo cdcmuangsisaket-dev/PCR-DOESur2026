@@ -729,11 +729,11 @@
         </div>
     </div>
 
-    <!-- โหมดข้อมูล 123 (รวม Rapid Test) -->
+    <!-- โหมดลงข้อมูลงานระบาด (รวม Rapid Test) -->
     <div id="labInfoModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 p-4 no-print">
         <div class="bg-white p-6 rounded-xl shadow-2xl w-full max-w-lg transform transition-all scale-95 opacity-0 max-h-[90vh] overflow-y-auto" id="labInfoModalContent">
             <h3 class="text-lg font-bold text-slate-800 mb-2 border-b border-slate-100 pb-3 flex items-center gap-2">
-                <span class="text-2xl">📝</span> ลงข้อมูลงานระบาด
+                <span class="text-2xl">📝</span> ข้อมูลส่วนเสริมใบนำส่ง
             </h3>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-4 mb-6 mt-4">
                 <div class="sm:col-span-2">
@@ -1210,7 +1210,7 @@
                                 <button onclick="window.printLabDocument('${row.id}')" class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="พิมพ์ใบนำส่งห้องแลป">
                                     <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"></path></svg>
                                 </button>
-                                <button onclick="window.requestAuth('labInfo', '${row.id}')" class="px-2 py-1 text-[10px] sm:text-xs font-medium bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded transition-colors border border-amber-200 hover:border-amber-600" title="แก้ไขข้อมูลระบาด">
+                                <button onclick="window.requestAuth('labInfo', '${row.id}')" class="px-2 py-1 text-[10px] sm:text-xs font-medium bg-amber-50 text-amber-600 hover:bg-amber-600 hover:text-white rounded transition-colors border border-amber-200 hover:border-amber-600" title="ลงข้อมูลงานระบาด">
                                     📝 ลงข้อมูลงานระบาด
                                 </button>
                                 <button onclick="window.requestAuth('labResult', '${row.id}')" class="px-2 py-1 text-[10px] sm:text-xs font-medium bg-blue-50 text-blue-600 hover:bg-blue-600 hover:text-white rounded transition-colors border border-blue-200 hover:border-blue-600" title="ลงผลสำหรับ รพ.">
@@ -1875,6 +1875,22 @@
             if(recordTimeInput) {
                 recordTimeInput.value = `${String(today.getHours()).padStart(2,'0')}:${String(today.getMinutes()).padStart(2,'0')}`;
             }
+
+            // ระบบป้องกันคนกรอกปี พ.ศ. ผิด (แปลงเป็น ค.ศ. ให้อัตโนมัติ)
+            document.querySelectorAll('input[type="date"]').forEach(input => {
+                input.addEventListener('change', function() {
+                    if (this.value) {
+                        const parts = this.value.split('-');
+                        let year = parseInt(parts[0]);
+                        // ถ้าผู้ใช้กรอกปี พ.ศ. (เช่น 2569) ให้ลบ 543 เป็น ค.ศ. อัตโนมัติ
+                        if (year > 2400) { 
+                            year -= 543;
+                            parts[0] = year.toString();
+                            this.value = parts.join('-');
+                        }
+                    }
+                });
+            });
 
             const fullNameInput = document.getElementById('fullName');
             if (fullNameInput) {
