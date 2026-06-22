@@ -1316,7 +1316,10 @@
             document.getElementById('printDiagnosis').innerText = record.diagnosis || '';
 
             document.body.classList.add('print-summary-mode');
-            setTimeout(() => { window.print(); }, 200); 
+            
+            // แก้ไข: บังคับให้อัปเดตหน้าจอทันที ไม่หน่วงเวลา ป้องกัน iPad บล็อกคำสั่งปริ้น
+            document.body.offsetHeight; 
+            window.print();
         }
 
         window.printLabDocument = function(id) {
@@ -1407,7 +1410,10 @@
             document.getElementById('labPrintRp23DetText').innerText = record.rp23DetectedText || '';
 
             document.body.classList.add('print-lab-mode');
-            setTimeout(() => { window.print(); }, 200);
+            
+            // แก้ไข: บังคับให้อัปเดตหน้าจอทันที ไม่หน่วงเวลา ป้องกัน iPad บล็อกคำสั่งปริ้น
+            document.body.offsetHeight; 
+            window.print();
         }
 
         window.onafterprint = function() {
