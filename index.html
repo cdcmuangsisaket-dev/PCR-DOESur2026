@@ -803,7 +803,7 @@
         </div>
     </div>
 
-    <!-- โหมดลงผลแลป รพ. (แก้ไขตัดระบบ Upload ไฟล์ออกแบบถาวร) -->
+    <!-- โหมดลงผลแลป รพ. -->
     <div id="labResultModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity no-print">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-lg mx-auto transform transition-all scale-95 opacity-0 max-h-[90vh] overflow-y-auto" id="labResultModalContent">
             <h3 class="text-lg font-bold text-slate-800 mb-2 border-b border-slate-100 pb-3 flex items-center gap-2">
@@ -882,12 +882,10 @@
                         </select>
                     </div>
                 </div>
-                <!-- ส่วนอ่านไฟล์ด้วย AI ถูกเก็บไว้ แต่ไม่มีการอัปโหลดไป Firebase Storage แล้ว -->
+
                 <div class="pt-4 border-t border-slate-100">
                     <label class="block text-sm font-bold text-slate-700 mb-2">เลือกไฟล์ผลตรวจเพื่ออ่านค่าอัตโนมัติ <span class="text-xs text-rose-500 font-normal">(ระบบจะไม่บันทึกไฟล์นี้ลงฐานข้อมูล)</span></label>
                     <input type="file" id="labFileUpload" accept=".pdf,image/png,image/jpeg,image/jpg" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-lg cursor-pointer transition-colors outline-none focus:ring-2 focus:ring-blue-200">
-                    
-                    <!-- ส่วนแสดงสถานะการสแกน OCR / PDF -->
                     <div id="ocrStatusText" class="mt-2 min-h-[20px]"></div>
                 </div>
             </div>
@@ -962,7 +960,6 @@
             "บึงบูรพ์": ["บึงบูรพ์", "เป๊าะ"]
         };
 
-        // Populate Amphoe
         const amphoeSelect = document.getElementById('labAmphoe');
         const defaultAmphoeOption = document.createElement('option');
         defaultAmphoeOption.value = "";
@@ -1031,7 +1028,6 @@
         const activeTabClass = "py-4 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors whitespace-nowrap flex items-center gap-2";
         const inactiveTabClass = "py-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors whitespace-nowrap flex items-center gap-2";
 
-        // Global functions mapped to window object
         window.switchTab = function(tabName) {
             document.getElementById('formSection').classList.add('hidden');
             document.getElementById('listSection').classList.add('hidden');
@@ -1317,9 +1313,9 @@
 
             document.body.classList.add('print-summary-mode');
             
-            // แก้ไข: บังคับให้อัปเดตหน้าจอทันที ไม่หน่วงเวลา ป้องกัน iPad บล็อกคำสั่งปริ้น
+            // บังคับจัดหน้ากระดาษและปริ้นทันที (แก้ปัญหา iPad)
             document.body.offsetHeight; 
-            window.print();
+            window.print(); 
         }
 
         window.printLabDocument = function(id) {
@@ -1411,7 +1407,7 @@
 
             document.body.classList.add('print-lab-mode');
             
-            // แก้ไข: บังคับให้อัปเดตหน้าจอทันที ไม่หน่วงเวลา ป้องกัน iPad บล็อกคำสั่งปริ้น
+            // บังคับจัดหน้ากระดาษและปริ้นทันที (แก้ปัญหา iPad)
             document.body.offsetHeight; 
             window.print();
         }
@@ -1567,7 +1563,7 @@
                 }
 
                 document.getElementById('labFileUpload').value = '';
-                document.getElementById('ocrStatusText').innerHTML = ''; // ล้างสถานะเก่า
+                document.getElementById('ocrStatusText').innerHTML = ''; 
             }
             
             document.getElementById('labResultModal').classList.remove('hidden');
@@ -1601,9 +1597,6 @@
                 rp23Result: document.getElementById('labRp23Select').value,
                 rp23DetectedText: document.getElementById('labRp23Pathogen').value
             };
-
-            // ตัดโค้ดการอัปโหลดไฟล์ไปที่ Firebase Storage ออกแล้ว 
-            // ทำให้บันทึกผลได้ทันที ไม่เจอปัญหา Permission Denied
 
             try {
                 const docRef = doc(db, 'pcr_records', updatingLabId);
@@ -2333,6 +2326,8 @@
                         "mycoplasma pneumoniae": "Mycoplasma pneumoniae",
                         "mycoplasma": "Mycoplasma pneumoniae"
                     };
+
+                    const sortedKeys = Object.keys(pathogenMap).sort((a, b) => b.length - a.length);
 
                     // 2. หาคำว่า Detected, Positive, Reactive ที่เหลือรอดจากการกรอง
                     const posRegex = /(detected|positive|reactive)/g;
