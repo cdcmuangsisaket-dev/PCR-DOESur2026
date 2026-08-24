@@ -208,9 +208,9 @@
                         <div class="md:col-span-12 form-group mt-2">
                             <label class="flex items-center gap-2 text-sm font-medium text-slate-700 mb-3">
                                 <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                อาการเบื้องต้น <span class="text-rose-500">* (ต้องมี ไข้, ไอ, หอบเหนื่อย ครบ 3 อาการ)</span>
+                                อาการเบื้องต้น <span class="text-rose-500">* (ต้องมี ไข้, ไอ, หอบเหนื่อย ครบ 3 อาการ หรือ Pneumonia)</span>
                             </label>
-                            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-4">
                                 <label class="cursor-pointer relative check-card group">
                                     <input type="checkbox" name="symptoms" value="ไข้" class="sr-only">
                                     <div class="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-slate-200 bg-white transition-all text-slate-600 hover:bg-slate-50 shadow-sm">
@@ -230,6 +230,13 @@
                                     <div class="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-slate-200 bg-white transition-all text-slate-600 hover:bg-slate-50 shadow-sm">
                                         <svg class="w-5 h-5 hidden text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
                                         <span class="text-sm font-medium">อาการหอบเหนื่อย</span>
+                                    </div>
+                                </label>
+                                <label class="cursor-pointer relative check-card group">
+                                    <input type="checkbox" name="symptoms" value="Pneumonia" class="sr-only">
+                                    <div class="flex items-center justify-center gap-2 p-3.5 rounded-xl border border-slate-200 bg-white transition-all text-slate-600 hover:bg-slate-50 shadow-sm">
+                                        <svg class="w-5 h-5 hidden text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"></path></svg>
+                                        <span class="text-sm font-medium">Pneumonia</span>
                                     </div>
                                 </label>
                                 <label class="cursor-pointer relative check-card group">
@@ -526,7 +533,7 @@
             </div>
             <div class="grid grid-cols-2 gap-y-1.5">
                 <div class="flex gap-2"><span class="font-bold">ผู้ประสานและนำส่งตัวอย่าง</span> <span>น.ส. พัทธ์ชญา พลับพลึง</span></div>
-                <div class="flex gap-2"><span class="font-bold">รหัสผู้ป่วย (ID) SSKH</span> <span id="labPrintPatientId" class="border-b border-dotted border-black flex-1 text-center font-bold"></span></div>
+                <div class="flex gap-2"><span class="font-bold">รหัสผู้ป่วย (ID)</span> <span id="labPrintPatientId" class="border-b border-dotted border-black flex-1 text-center font-bold"></span></div>
                 <div class="flex gap-2"><span class="font-bold">โรงพยาบาล</span> <span>ศรีสะเกษ</span> <span class="font-bold ml-6">จังหวัด</span> <span>ศรีสะเกษ</span></div>
                 <div class="flex gap-2"><span class="font-bold">โทรศัพท์</span> <span>0854976091</span></div>
             </div>
@@ -803,7 +810,7 @@
         </div>
     </div>
 
-    <!-- โหมดลงผลแลป รพ. -->
+    <!-- โหมดลงผลแลป รพ. (แก้ไขตัดระบบ Upload ไฟล์ออกแบบถาวร) -->
     <div id="labResultModal" class="fixed inset-0 z-50 flex items-center justify-center hidden bg-slate-900/40 backdrop-blur-sm transition-opacity no-print">
         <div class="bg-white rounded-xl shadow-2xl p-6 w-11/12 max-w-lg mx-auto transform transition-all scale-95 opacity-0 max-h-[90vh] overflow-y-auto" id="labResultModalContent">
             <h3 class="text-lg font-bold text-slate-800 mb-2 border-b border-slate-100 pb-3 flex items-center gap-2">
@@ -882,10 +889,12 @@
                         </select>
                     </div>
                 </div>
-
+                <!-- ส่วนอ่านไฟล์ด้วย AI ถูกเก็บไว้ แต่ไม่มีการอัปโหลดไป Firebase Storage แล้ว -->
                 <div class="pt-4 border-t border-slate-100">
                     <label class="block text-sm font-bold text-slate-700 mb-2">เลือกไฟล์ผลตรวจเพื่ออ่านค่าอัตโนมัติ <span class="text-xs text-rose-500 font-normal">(ระบบจะไม่บันทึกไฟล์นี้ลงฐานข้อมูล)</span></label>
                     <input type="file" id="labFileUpload" accept=".pdf,image/png,image/jpeg,image/jpg" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-lg cursor-pointer transition-colors outline-none focus:ring-2 focus:ring-blue-200">
+                    
+                    <!-- ส่วนแสดงสถานะการสแกน OCR / PDF -->
                     <div id="ocrStatusText" class="mt-2 min-h-[20px]"></div>
                 </div>
             </div>
@@ -960,6 +969,7 @@
             "บึงบูรพ์": ["บึงบูรพ์", "เป๊าะ"]
         };
 
+        // Populate Amphoe
         const amphoeSelect = document.getElementById('labAmphoe');
         const defaultAmphoeOption = document.createElement('option');
         defaultAmphoeOption.value = "";
@@ -1028,6 +1038,7 @@
         const activeTabClass = "py-4 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors whitespace-nowrap flex items-center gap-2";
         const inactiveTabClass = "py-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors whitespace-nowrap flex items-center gap-2";
 
+        // Global functions mapped to window object
         window.switchTab = function(tabName) {
             document.getElementById('formSection').classList.add('hidden');
             document.getElementById('listSection').classList.add('hidden');
@@ -1313,9 +1324,9 @@
 
             document.body.classList.add('print-summary-mode');
             
-            // บังคับจัดหน้ากระดาษและปริ้นทันที (แก้ปัญหา iPad)
+            // แก้ไข: บังคับให้อัปเดตหน้าจอทันที ไม่หน่วงเวลา ป้องกัน iPad บล็อกคำสั่งปริ้น
             document.body.offsetHeight; 
-            window.print(); 
+            window.print();
         }
 
         window.printLabDocument = function(id) {
@@ -1378,6 +1389,7 @@
             
             let otherSymp = [];
             if(symp.includes('ใส่ท่อช่วยหายใจ')) otherSymp.push('ใส่ท่อช่วยหายใจ (ETT)');
+            if(symp.includes('Pneumonia')) otherSymp.push('Pneumonia');
             document.getElementById('labPrintOtherSympCheckbox').innerText = otherSymp.length > 0 ? '✓' : '';
             document.getElementById('labPrintOtherSympText').innerText = otherSymp.length > 0 ? otherSymp.join(', ') : '';
             
@@ -1407,7 +1419,7 @@
 
             document.body.classList.add('print-lab-mode');
             
-            // บังคับจัดหน้ากระดาษและปริ้นทันที (แก้ปัญหา iPad)
+            // แก้ไข: บังคับให้อัปเดตหน้าจอทันที ไม่หน่วงเวลา ป้องกัน iPad บล็อกคำสั่งปริ้น
             document.body.offsetHeight; 
             window.print();
         }
@@ -1563,7 +1575,7 @@
                 }
 
                 document.getElementById('labFileUpload').value = '';
-                document.getElementById('ocrStatusText').innerHTML = ''; 
+                document.getElementById('ocrStatusText').innerHTML = ''; // ล้างสถานะเก่า
             }
             
             document.getElementById('labResultModal').classList.remove('hidden');
@@ -1597,6 +1609,9 @@
                 rp23Result: document.getElementById('labRp23Select').value,
                 rp23DetectedText: document.getElementById('labRp23Pathogen').value
             };
+
+            // ตัดโค้ดการอัปโหลดไฟล์ไปที่ Firebase Storage ออกแล้ว 
+            // ทำให้บันทึกผลได้ทันที ไม่เจอปัญหา Permission Denied
 
             try {
                 const docRef = doc(db, 'pcr_records', updatingLabId);
@@ -2081,7 +2096,7 @@
                 }
 
                 const symptoms = Array.from(document.querySelectorAll('input[name="symptoms"]:checked')).map(cb => cb.value);
-                const hasRequiredSymptoms = symptoms.includes('ไข้') && symptoms.includes('ไอ') && symptoms.includes('หอบเหนื่อย');
+                const hasRequiredSymptoms = (symptoms.includes('ไข้') && symptoms.includes('ไอ') && symptoms.includes('หอบเหนื่อย')) || symptoms.includes('Pneumonia');
 
                 if (!document.getElementById('mainForm').checkValidity() || !hasRequiredSymptoms) {
                     const invalidElements = document.getElementById('mainForm').querySelectorAll(':invalid');
@@ -2118,7 +2133,7 @@
                         if (!symGroup.querySelector('.error-msg')) {
                             const errorMsg = document.createElement('div');
                             errorMsg.className = 'error-msg text-rose-500 text-xs mt-1.5 font-medium';
-                            errorMsg.innerText = `* ต้องเลือกอาการ ไข้, ไอ และ หอบเหนื่อย (ครบทั้ง 3 อาการ) ถึงจะเข้าเกณฑ์บันทึกได้`;
+                            errorMsg.innerText = `* ต้องเลือกอาการ ไข้+ไอ+หอบเหนื่อย หรือเลือก Pneumonia อย่างใดอย่างหนึ่ง ถึงจะเข้าเกณฑ์บันทึกได้`;
                             symGroup.appendChild(errorMsg);
                         }
                         if (isFirstError) { symGroup.scrollIntoView({ behavior: 'smooth', block: 'center' }); isFirstError = false; }
@@ -2326,8 +2341,6 @@
                         "mycoplasma pneumoniae": "Mycoplasma pneumoniae",
                         "mycoplasma": "Mycoplasma pneumoniae"
                     };
-
-                    const sortedKeys = Object.keys(pathogenMap).sort((a, b) => b.length - a.length);
 
                     // 2. หาคำว่า Detected, Positive, Reactive ที่เหลือรอดจากการกรอง
                     const posRegex = /(detected|positive|reactive)/g;
