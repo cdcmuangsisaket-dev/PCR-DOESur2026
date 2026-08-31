@@ -625,19 +625,19 @@
                 <span id="labPrintSpecNPS" class="border border-black w-4 h-4 flex items-center justify-center text-[10px] font-bold"></span> Nasopharyngeal swab
             </div>
             <div class="flex items-center gap-2">
-                <span class="border border-black w-4 h-4 inline-block"></span> Nasopharyngeal aspirate
+                <span id="labPrintSpecNPA" class="border border-black w-4 h-4 flex items-center justify-center text-[10px] font-bold"></span> Nasopharyngeal aspirate
             </div>
             <div class="flex items-center gap-2">
-                <span class="border border-black w-4 h-4 inline-block"></span> Nasopharyngeal wash
+                <span id="labPrintSpecNPW" class="border border-black w-4 h-4 flex items-center justify-center text-[10px] font-bold"></span> Nasopharyngeal wash
             </div>
             <div class="flex items-center gap-2">
                 <span id="labPrintSpecTracheal" class="border border-black w-4 h-4 flex items-center justify-center text-[10px] font-bold"></span> Tracheal secretion
             </div>
             <div class="flex items-center gap-2">
-                <span class="border border-black w-4 h-4 inline-block"></span> Sputum
+                <span id="labPrintSpecSputum" class="border border-black w-4 h-4 flex items-center justify-center text-[10px] font-bold"></span> Sputum
             </div>
             <div class="flex items-center gap-2 col-span-2">
-                <span class="border border-black w-4 h-4 inline-block"></span> Bronchoalveolar lavage
+                <span id="labPrintSpecBAL" class="border border-black w-4 h-4 flex items-center justify-center text-[10px] font-bold"></span> Bronchoalveolar lavage
             </div>
             <div class="col-span-2 flex items-center gap-2 mt-1">
                 <span class="font-bold">วันที่เก็บตัวอย่าง</span> <span id="labPrintCollectDate" class="border-b border-dotted border-black w-48 text-center"></span>
@@ -1424,11 +1424,26 @@
             document.getElementById('labPrintRapidPosText').innerText = record.rapidTestPositiveText || '';
 
             const spec = record.specimen || '';
-            document.getElementById('labPrintSpecThroat').innerText = spec.includes('TS') ? '✓' : '';
-            document.getElementById('labPrintSpecNPS').innerText = spec.includes('NPS') ? '✓' : '';
+            const specOther = record.specimenOther || '';
+            const combinedSpec = (spec + ' ' + specOther).toUpperCase();
+
+            document.getElementById('labPrintSpecThroat').innerText = combinedSpec.includes('TS') || combinedSpec.includes('THROAT') ? '✓' : '';
+            document.getElementById('labPrintSpecNPS').innerText = combinedSpec.includes('NPS') || combinedSpec.includes('NASOPHARYNGEAL SWAB') ? '✓' : '';
             
+            if (document.getElementById('labPrintSpecNPA')) {
+                document.getElementById('labPrintSpecNPA').innerText = combinedSpec.includes('NPA') || combinedSpec.includes('ASPIRATE') ? '✓' : '';
+            }
+            if (document.getElementById('labPrintSpecNPW')) {
+                document.getElementById('labPrintSpecNPW').innerText = combinedSpec.includes('NPW') || combinedSpec.includes('WASH') ? '✓' : '';
+            }
             if (document.getElementById('labPrintSpecTracheal')) {
-                document.getElementById('labPrintSpecTracheal').innerText = symp.includes('ใส่ท่อช่วยหายใจ') ? '✓' : '';
+                document.getElementById('labPrintSpecTracheal').innerText = combinedSpec.includes('TRACHEAL') ? '✓' : '';
+            }
+            if (document.getElementById('labPrintSpecSputum')) {
+                document.getElementById('labPrintSpecSputum').innerText = combinedSpec.includes('SPUTUM') ? '✓' : '';
+            }
+            if (document.getElementById('labPrintSpecBAL')) {
+                document.getElementById('labPrintSpecBAL').innerText = combinedSpec.includes('BAL') || combinedSpec.includes('BRONCHOALVEOLAR') ? '✓' : '';
             }
             
             document.getElementById('labPrintCollectDate').innerText = collectDateFormatted;
