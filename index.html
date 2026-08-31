@@ -533,7 +533,7 @@
             </div>
             <div class="grid grid-cols-2 gap-y-1.5">
                 <div class="flex gap-2"><span class="font-bold">ผู้ประสานและนำส่งตัวอย่าง</span> <span>น.ส. พัทธ์ชญา พลับพลึง</span></div>
-                <div class="flex gap-2"><span class="font-bold">รหัสผู้ป่วย (ID) SSKH</span> <span id= "labPrintPatientId" class="border-b border-dotted border-black flex-1 text-center font-bold"></span></div>
+                <div class="flex gap-2"><span class="font-bold">รหัสผู้ป่วย (ID)</span> <span id="labPrintPatientId" class="border-b border-dotted border-black flex-1 text-center font-bold"></span></div>
                 <div class="flex gap-2"><span class="font-bold">โรงพยาบาล</span> <span>ศรีสะเกษ</span> <span class="font-bold ml-6">จังหวัด</span> <span>ศรีสะเกษ</span></div>
                 <div class="flex gap-2"><span class="font-bold">โทรศัพท์</span> <span>0854976091</span></div>
             </div>
@@ -895,8 +895,6 @@
                 <div class="pt-4 border-t border-slate-100">
                     <label class="block text-sm font-bold text-slate-700 mb-2">เลือกไฟล์ผลตรวจเพื่ออ่านค่าอัตโนมัติ <span class="text-xs text-rose-500 font-normal">(ระบบจะไม่บันทึกไฟล์นี้ลงฐานข้อมูล)</span></label>
                     <input type="file" id="labFileUpload" accept=".pdf,image/png,image/jpeg,image/jpg" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-lg cursor-pointer transition-colors outline-none focus:ring-2 focus:ring-blue-200">
-                    
-                    <!-- ส่วนแสดงสถานะการสแกน OCR / PDF -->
                     <div id="ocrStatusText" class="mt-2 min-h-[20px]"></div>
                 </div>
             </div>
@@ -1350,7 +1348,7 @@
 
             document.body.classList.add('print-summary-mode');
             
-            // บังคับจัดหน้ากระดาษและปริ้นทันที (แก้ปัญหา iPad)
+            // บังคับให้เบราว์เซอร์จัดหน้ากระดาษทันที แล้วเรียก print โดยไม่หน่วงเวลา (แก้ปัญหา iPad บล็อก)
             document.body.offsetHeight; 
             window.print(); 
         }
@@ -1361,7 +1359,7 @@
 
             const sortedAllData = [...pcrData].sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0));
             const patientIndex = sortedAllData.findIndex(r => r.id === id);
-            const patientIdNumber = patientIndex !== -1 ? patientIndex + 1 : '';
+            const patientIdNumber = patientIndex !== -1 ? 'SSKH' + (patientIndex + 1) : '';
             if(document.getElementById('labPrintPatientId')) {
                 document.getElementById('labPrintPatientId').innerText = patientIdNumber;
             }
@@ -1445,7 +1443,7 @@
 
             document.body.classList.add('print-lab-mode');
             
-            // บังคับจัดหน้ากระดาษและปริ้นทันที (แก้ปัญหา iPad)
+            // บังคับให้เบราว์เซอร์จัดหน้ากระดาษทันที แล้วเรียก print โดยไม่หน่วงเวลา (แก้ปัญหา iPad บล็อก)
             document.body.offsetHeight; 
             window.print();
         }
@@ -1984,27 +1982,21 @@
                 });
             });
 
+            // ดักจับการเปลี่ยนค่า Dropdown เพื่อให้เป็นแบบ Co-infection
             const rp23Sel = document.getElementById('labRp23Select');
             if(rp23Sel) {
                 rp23Sel.addEventListener('change', function(e) {
                     const pathSel = document.getElementById('labRp23Pathogen');
                     if (e.target.value === 'Detected') {
-                        pathSel.disabled = false; pathSel.classList.remove('bg-slate-100', 'text-slate-400'); 
-                        
-                        // ถ้าระบบเคยล้างข้อมูลไปตอนกด Not Detected ให้วาดป้ายกลับมาใหม่
-                        if(currentSelectedPathogens.length === 0) {
-                            // ให้ผู้ใช้เลือกจาก Dropdown เอา
-                        }
+                        pathSel.disabled = false; pathSel.classList.remove('bg-slate-100', 'text-slate-400');
                     } else {
                         pathSel.disabled = true; pathSel.classList.add('bg-slate-100', 'text-slate-400'); pathSel.value = '';
-                        // เคลียร์ป้ายเชื้อออกให้หมดถ้าหมอเปลี่ยนใจเป็น Not detected
                         currentSelectedPathogens = [];
                         window.renderPathogenPills();
                     }
                 });
             }
             
-            // ดักจับการเลือก Dropdown รายชื่อเชื้อ
             const pathSel = document.getElementById('labRp23Pathogen');
             if (pathSel) {
                 pathSel.addEventListener('change', function(e) {
@@ -2013,7 +2005,7 @@
                         currentSelectedPathogens.push(val);
                         window.renderPathogenPills();
                     }
-                    // รีเซ็ต Dropdown กลับเป็นค่าเริ่มต้นทันทีหลังเลือกเสร็จ
+                    // Reset กลับไปตัวบนสุดทันทีเพื่อเลือกใหม่ได้เรื่อยๆ
                     e.target.value = '';
                 });
             }
@@ -2273,7 +2265,7 @@
             });
 
             // ------------------------------------------------------------
-            // ระบบ AI & ขุดข้อมูล ช่วยอ่านผลแลป (OCR + PDF Parsing V.3 - Multi-Pathogen)
+            // ระบบ AI & ขุดข้อมูล ช่วยอ่านผลแลป (OCR + PDF Parsing V.3 - Proximity Search แบบหลายเชื้อ)
             // ------------------------------------------------------------
             document.getElementById('labFileUpload').addEventListener('change', async function(e) {
                 const file = e.target.files[0];
@@ -2322,6 +2314,7 @@
                         extractedText = result.data.text;
                     }
 
+                    // ปรับแต่งข้อความให้วิเคราะห์ง่ายขึ้น
                     let text = extractedText.toLowerCase().replace(/\s+/g, ' ');
                     let isDetected = false;
                     let foundPathogensSet = new Set();
@@ -2390,19 +2383,43 @@
                         positiveIndices.push(match.index);
                     }
 
-                    // อัลกอริทึมใหม่ ดึงทุกเชื้อที่อยู่ใกล้ "Detected" (รองรับ Co-infection)
                     if (positiveIndices.length > 0) {
                         isDetected = true;
                         
-                        for (let idx of positiveIndices) {
-                            let start = Math.max(0, idx - 100);
-                            let end = Math.min(safeText.length, idx + 100);
-                            let windowText = safeText.substring(start, end);
-                            
-                            for (const key of sortedKeys) {
-                                if (windowText.includes(key)) {
-                                    foundPathogensSet.add(pathogenMap[key]);
+                        for (let posIdx of positiveIndices) {
+                            let closestPathogen = "";
+                            let minDistance = Infinity;
+
+                            for (const key in pathogenMap) {
+                                let keyIdx = safeText.indexOf(key);
+                                while (keyIdx !== -1) {
+                                    let distance = posIdx - (keyIdx + key.length);
+                                    
+                                    if (distance >= 0 && distance < 150 && distance < minDistance) {
+                                        minDistance = distance;
+                                        closestPathogen = pathogenMap[key];
+                                    }
+                                    
+                                    keyIdx = safeText.indexOf(key, keyIdx + 1);
                                 }
+                            }
+
+                            if (!closestPathogen) {
+                                for (const key in pathogenMap) {
+                                    let keyIdx = safeText.indexOf(key);
+                                    while (keyIdx !== -1) {
+                                        let distance = Math.abs(posIdx - keyIdx);
+                                        if (distance < 150 && distance < minDistance) {
+                                            minDistance = distance;
+                                            closestPathogen = pathogenMap[key];
+                                        }
+                                        keyIdx = safeText.indexOf(key, keyIdx + 1);
+                                    }
+                                }
+                            }
+
+                            if (closestPathogen) {
+                                foundPathogensSet.add(closestPathogen);
                             }
                         }
                     }
