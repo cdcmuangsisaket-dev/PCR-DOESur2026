@@ -862,7 +862,7 @@
                             <option value="Detected" class="text-rose-600 font-bold">Detected (พบเชื้อ)</option>
                         </select>
                         <select id="labRp23Pathogen" class="w-full px-3 py-2.5 rounded-lg border border-slate-300 outline-none bg-slate-100 text-slate-400 focus:ring-2 focus:ring-blue-200" disabled>
-                            <option value="">-- เลือกเชื้อที่ตรวจพบ --</option>
+                            <option value="">-- เลือกเชื้อที่ตรวจพบ (เพิ่มได้มากกว่า 1) --</option>
                             <option value="Adenovirus">Adenovirus</option>
                             <option value="Bocavirus">Bocavirus</option>
                             <option value="Coronavirus 229E">Coronavirus 229E</option>
@@ -887,13 +887,16 @@
                             <option value="Legionella pneumophilia">Legionella pneumophilia</option>
                             <option value="Mycoplasma pneumoniae">Mycoplasma pneumoniae</option>
                         </select>
+                        <!-- Container สำหรับป้ายเชื้อที่เลือก -->
+                        <div id="pathogenPillsContainer" class="flex flex-wrap gap-2 mt-2 empty:hidden"></div>
                     </div>
                 </div>
-                
+
                 <div class="pt-4 border-t border-slate-100">
                     <label class="block text-sm font-bold text-slate-700 mb-2">เลือกไฟล์ผลตรวจเพื่ออ่านค่าอัตโนมัติ <span class="text-xs text-rose-500 font-normal">(ระบบจะไม่บันทึกไฟล์นี้ลงฐานข้อมูล)</span></label>
                     <input type="file" id="labFileUpload" accept=".pdf,image/png,image/jpeg,image/jpg" class="block w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100 border border-slate-200 rounded-lg cursor-pointer transition-colors outline-none focus:ring-2 focus:ring-blue-200">
                     
+                    <!-- ส่วนแสดงสถานะการสแกน OCR / PDF -->
                     <div id="ocrStatusText" class="mt-2 min-h-[20px]"></div>
                 </div>
             </div>
@@ -924,6 +927,9 @@
         let updatingLabId = null;
         let pcrData = []; 
         let isFirebaseReady = false;
+        
+        // ตัวแปรสำหรับเก็บรายชื่อเชื้อที่เลือก
+        let currentSelectedPathogens = [];
 
         const firebaseConfig = {
             apiKey: "AIzaSyBky3iEhMNj2mzqssbRW_8UQNBbjjSbWfI",
@@ -1035,6 +1041,29 @@
 
         const activeTabClass = "py-4 text-sm font-semibold border-b-2 border-blue-600 text-blue-600 transition-colors whitespace-nowrap flex items-center gap-2";
         const inactiveTabClass = "py-4 text-sm font-semibold border-b-2 border-transparent text-slate-500 hover:text-slate-800 transition-colors whitespace-nowrap flex items-center gap-2";
+
+        // ฟังก์ชันวาดป้ายเชื้อ (Pills)
+        window.renderPathogenPills = function() {
+            const container = document.getElementById('pathogenPillsContainer');
+            container.innerHTML = '';
+            currentSelectedPathogens.forEach((pathogen, index) => {
+                const pill = document.createElement('div');
+                pill.className = "flex items-center gap-1 bg-rose-100 text-rose-700 px-3 py-1 rounded-full text-xs font-bold border border-rose-200 shadow-sm";
+                pill.innerHTML = `
+                    ${pathogen}
+                    <button type="button" onclick="window.removePathogen(${index})" class="text-rose-500 hover:text-rose-800 focus:outline-none ml-1">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                    </button>
+                `;
+                container.appendChild(pill);
+            });
+        }
+
+        // ฟังก์ชันลบป้ายเชื้อ
+        window.removePathogen = function(index) {
+            currentSelectedPathogens.splice(index, 1);
+            window.renderPathogenPills();
+        }
 
         window.switchTab = function(tabName) {
             document.getElementById('formSection').classList.add('hidden');
@@ -1321,6 +1350,7 @@
 
             document.body.classList.add('print-summary-mode');
             
+            // บังคับจัดหน้ากระดาษและปริ้นทันที (แก้ปัญหา iPad)
             document.body.offsetHeight; 
             window.print(); 
         }
@@ -1415,6 +1445,7 @@
 
             document.body.classList.add('print-lab-mode');
             
+            // บังคับจัดหน้ากระดาษและปริ้นทันที (แก้ปัญหา iPad)
             document.body.offsetHeight; 
             window.print();
         }
@@ -1451,6 +1482,7 @@
                     tambonSelect.disabled = true;
                 }
 
+                // Rapid Test Logic
                 const rapidRadios = document.querySelectorAll('input[name="labRapidResult"]');
                 const rapidText = document.getElementById('labRapidText');
                 let foundRapid = false;
@@ -1547,20 +1579,16 @@
 
                 const rp23Select = document.getElementById('labRp23Select');
                 const rp23Pathogen = document.getElementById('labRp23Pathogen');
-                rp23Select.value = record.rp23Result || '';
                 
-                let foundPathogen = false;
-                Array.from(rp23Pathogen.options).forEach(opt => {
-                    if(opt.value === record.rp23DetectedText) foundPathogen = true;
-                });
-                if(record.rp23DetectedText && !foundPathogen) {
-                    const newOpt = document.createElement('option');
-                    newOpt.value = record.rp23DetectedText;
-                    newOpt.text = record.rp23DetectedText;
-                    rp23Pathogen.add(newOpt);
+                // รีเซ็ตค่าอาเรย์เชื้อที่เลือก
+                currentSelectedPathogens = [];
+                if (record.rp23DetectedText) {
+                    currentSelectedPathogens = record.rp23DetectedText.split(',').map(s => s.trim()).filter(s => s);
                 }
+                window.renderPathogenPills();
                 
-                rp23Pathogen.value = record.rp23DetectedText || '';
+                rp23Select.value = record.rp23Result || '';
+                rp23Pathogen.value = '';
                 
                 if(rp23Select.value === 'Detected') {
                     rp23Pathogen.disabled = false; rp23Pathogen.classList.remove('bg-slate-100', 'text-slate-400');
@@ -1569,7 +1597,7 @@
                 }
 
                 document.getElementById('labFileUpload').value = '';
-                document.getElementById('ocrStatusText').innerHTML = '';
+                document.getElementById('ocrStatusText').innerHTML = ''; // ล้างสถานะเก่า
             }
             
             document.getElementById('labResultModal').classList.remove('hidden');
@@ -1596,12 +1624,13 @@
             
             const labCondResult = document.querySelector('input[name="labCondResult"]:checked').value;
 
+            // บันทึกรายชื่อเชื้อโดยการเอาอาเรย์มาเชื่อมด้วยลูกน้ำ
             let updateData = {
                 labResult: document.getElementById('labStatusSelect').value,
                 labCondition: labCondResult,
                 labConditionText: document.getElementById('labCondText').value,
                 rp23Result: document.getElementById('labRp23Select').value,
-                rp23DetectedText: document.getElementById('labRp23Pathogen').value
+                rp23DetectedText: currentSelectedPathogens.join(', ')
             };
 
             try {
@@ -1960,10 +1989,32 @@
                 rp23Sel.addEventListener('change', function(e) {
                     const pathSel = document.getElementById('labRp23Pathogen');
                     if (e.target.value === 'Detected') {
-                        pathSel.disabled = false; pathSel.classList.remove('bg-slate-100', 'text-slate-400'); pathSel.focus();
+                        pathSel.disabled = false; pathSel.classList.remove('bg-slate-100', 'text-slate-400'); 
+                        
+                        // ถ้าระบบเคยล้างข้อมูลไปตอนกด Not Detected ให้วาดป้ายกลับมาใหม่
+                        if(currentSelectedPathogens.length === 0) {
+                            // ให้ผู้ใช้เลือกจาก Dropdown เอา
+                        }
                     } else {
                         pathSel.disabled = true; pathSel.classList.add('bg-slate-100', 'text-slate-400'); pathSel.value = '';
+                        // เคลียร์ป้ายเชื้อออกให้หมดถ้าหมอเปลี่ยนใจเป็น Not detected
+                        currentSelectedPathogens = [];
+                        window.renderPathogenPills();
                     }
+                });
+            }
+            
+            // ดักจับการเลือก Dropdown รายชื่อเชื้อ
+            const pathSel = document.getElementById('labRp23Pathogen');
+            if (pathSel) {
+                pathSel.addEventListener('change', function(e) {
+                    const val = e.target.value;
+                    if (val && !currentSelectedPathogens.includes(val)) {
+                        currentSelectedPathogens.push(val);
+                        window.renderPathogenPills();
+                    }
+                    // รีเซ็ต Dropdown กลับเป็นค่าเริ่มต้นทันทีหลังเลือกเสร็จ
+                    e.target.value = '';
                 });
             }
             
@@ -2193,7 +2244,8 @@
                         ward: document.querySelector('input[name="ward"]:checked').value,
                         subWard: subWard, 
                         diagnosis: document.getElementById('diagnosis').value,
-                        labResult: editingId && existingRecord && existingRecord.labResult ? existingRecord.labResult : "รอรับตัวอย่าง"
+                        labResult: editingId && existingRecord && existingRecord.labResult ? existingRecord.labResult : "รอรับตัวอย่าง",
+                        rp23DetectedText: editingId && existingRecord && existingRecord.rp23DetectedText ? existingRecord.rp23DetectedText : ""
                     };
 
                     if (editingId) {
@@ -2221,7 +2273,7 @@
             });
 
             // ------------------------------------------------------------
-            // ระบบ AI & ขุดข้อมูล ช่วยอ่านผลแลป (OCR + PDF Parsing V.3 - Proximity Search)
+            // ระบบ AI & ขุดข้อมูล ช่วยอ่านผลแลป (OCR + PDF Parsing V.3 - Multi-Pathogen)
             // ------------------------------------------------------------
             document.getElementById('labFileUpload').addEventListener('change', async function(e) {
                 const file = e.target.files[0];
@@ -2258,12 +2310,10 @@
                         for (let i = 1; i <= pdf.numPages; i++) {
                             const page = await pdf.getPage(i);
                             const textContent = await page.getTextContent();
-                            // ดึงข้อความมาต่อกันตรงๆ โดยไม่ต้องพยายามเรียงบรรทัด (ป้องกันตารางเพี้ยน)
                             const pageText = textContent.items.map(item => item.str).join(' ');
                             extractedText += pageText + ' ';
                         }
 
-                        // ถ้าดึงข้อความออกมาได้น้อยมาก แสดงว่าเป็น PDF แบบสแกนรูปภาพ
                         if (extractedText.trim().length < 50) {
                             throw new Error("SCANNED_PDF");
                         }
@@ -2272,12 +2322,10 @@
                         extractedText = result.data.text;
                     }
 
-                    // ปรับแต่งข้อความให้วิเคราะห์ง่ายขึ้น
                     let text = extractedText.toLowerCase().replace(/\s+/g, ' ');
                     let isDetected = false;
-                    let pathogenFound = "";
+                    let foundPathogensSet = new Set();
                     
-                    // 1. นำคำปฏิเสธออกไปให้หมดก่อน ป้องกันการสับสน
                     let safeText = text.replace(/not\s*detected/g, '[[neg]]')
                                        .replace(/non[-\s]*detected/g, '[[neg]]')
                                        .replace(/undetected/g, '[[neg]]')
@@ -2335,7 +2383,6 @@
 
                     const sortedKeys = Object.keys(pathogenMap).sort((a, b) => b.length - a.length);
 
-                    // 2. หาคำว่า Detected, Positive, Reactive ที่เหลือรอดจากการกรอง
                     const posRegex = /(detected|positive|reactive)/g;
                     let match;
                     let positiveIndices = [];
@@ -2343,55 +2390,26 @@
                         positiveIndices.push(match.index);
                     }
 
-                    // 3. ค้นหาชื่อเชื้อที่ "อยู่ใกล้คำว่า Detected มากที่สุด"
+                    // อัลกอริทึมใหม่ ดึงทุกเชื้อที่อยู่ใกล้ "Detected" (รองรับ Co-infection)
                     if (positiveIndices.length > 0) {
                         isDetected = true;
                         
-                        let closestPathogen = "";
-                        let minDistance = Infinity;
-
-                        for (let posIdx of positiveIndices) {
-                            for (const key in pathogenMap) {
-                                let keyIdx = safeText.indexOf(key);
-                                while (keyIdx !== -1) {
-                                    // ระยะห่างจากจุดสิ้นสุดของชื่อเชื้อ ถึง จุดเริ่มต้นของคำว่า Detected
-                                    let distance = posIdx - (keyIdx + key.length);
-                                    
-                                    // ถ้าระยะห่างอยู่ระหว่าง 0 ถึง 150 ตัวอักษร (เชื้อต้องอยู่ก่อนผล)
-                                    if (distance >= 0 && distance < 150 && distance < minDistance) {
-                                        minDistance = distance;
-                                        closestPathogen = pathogenMap[key];
-                                    }
-                                    
-                                    // ค้นหาคำเดิมถัดไป
-                                    keyIdx = safeText.indexOf(key, keyIdx + 1);
+                        for (let idx of positiveIndices) {
+                            let start = Math.max(0, idx - 100);
+                            let end = Math.min(safeText.length, idx + 100);
+                            let windowText = safeText.substring(start, end);
+                            
+                            for (const key of sortedKeys) {
+                                if (windowText.includes(key)) {
+                                    foundPathogensSet.add(pathogenMap[key]);
                                 }
                             }
-                        }
-
-                        // เผื่อฟอร์แมตแปลกๆ ที่ชื่อเชื้ออยู่หลังผล
-                        if (!closestPathogen) {
-                            for (let posIdx of positiveIndices) {
-                                for (const key in pathogenMap) {
-                                    let keyIdx = safeText.indexOf(key);
-                                    while (keyIdx !== -1) {
-                                        let distance = Math.abs(posIdx - keyIdx);
-                                        if (distance < 150 && distance < minDistance) {
-                                            minDistance = distance;
-                                            closestPathogen = pathogenMap[key];
-                                        }
-                                        keyIdx = safeText.indexOf(key, keyIdx + 1);
-                                    }
-                                }
-                            }
-                        }
-
-                        if (closestPathogen) {
-                            pathogenFound = closestPathogen;
                         }
                     }
 
-                    // อัปเดต UI 
+                    let pathogenFoundArray = Array.from(foundPathogensSet);
+                    let pathogenFoundStr = pathogenFoundArray.join(', ');
+
                     const rp23Select = document.getElementById('labRp23Select');
                     const pathSelect = document.getElementById('labRp23Pathogen');
                     const statusSelect = document.getElementById('labStatusSelect');
@@ -2400,23 +2418,21 @@
                     pathSelect.value = "";
                     pathSelect.disabled = true;
                     pathSelect.classList.add('bg-slate-100', 'text-slate-400');
+                    currentSelectedPathogens = [];
+                    window.renderPathogenPills();
 
                     if (isDetected) {
                         rp23Select.value = "Detected";
                         pathSelect.disabled = false;
                         pathSelect.classList.remove('bg-slate-100', 'text-slate-400');
-                        if (pathogenFound) {
-                            let optionExists = Array.from(pathSelect.options).some(opt => opt.value === pathogenFound);
-                            if(!optionExists) {
-                                const newOpt = document.createElement('option');
-                                newOpt.value = pathogenFound;
-                                newOpt.text = pathogenFound;
-                                pathSelect.add(newOpt);
-                            }
-                            pathSelect.value = pathogenFound;
+                        
+                        if (pathogenFoundArray.length > 0) {
+                            currentSelectedPathogens = pathogenFoundArray;
+                            window.renderPathogenPills();
                         }
+                        
                         statusSelect.value = "ออกผลแล้ว";
-                        ocrStatus.innerHTML = `<span class="text-emerald-600 text-[11px] font-bold">✨ ระบบอ่านผลสำเร็จ! (พบเชื้อ ${pathogenFound || 'ไม่ระบุตัวเชื้อ ลองพิมพ์เอง'}) โปรดตรวจสอบอีกครั้ง</span>`;
+                        ocrStatus.innerHTML = `<span class="text-emerald-600 text-[11px] font-bold">✨ ระบบอ่านผลสำเร็จ! (พบเชื้อ ${pathogenFoundStr || 'ไม่ระบุตัวเชื้อ ลองพิมพ์เอง'}) โปรดตรวจสอบอีกครั้ง</span>`;
                     } else if (hasNegative) {
                         rp23Select.value = "Not detected";
                         statusSelect.value = "ออกผลแล้ว";
